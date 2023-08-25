@@ -4,10 +4,13 @@ import { appWindow } from '@tauri-apps/api/window';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import { onMounted, ref } from 'vue';
 import { register, unregisterAll } from '@tauri-apps/api/globalShortcut';
+import { useRoute } from 'vue-router';
 
 let url = ref('');
 let currentOpacity = ref(0);
 let currentOpacityIndex = 0;
+const route = useRoute()
+let m3u8_url = route.query.url
 
 let opacitys = [0, 0.2, 0.4, 0.6, 0.8, 1];
 let videoInstance: any = null;
@@ -25,7 +28,7 @@ onMounted(() => {
     });
     // bind them together
     hls.attachMedia(videoInstance);
-    hls.loadSource('https://vip.lz-cdn3.com/20230823/21252_d6ac2d73/2000k/hls/mixed.m3u8');
+    hls.loadSource(m3u8_url);
   }
   videoInstance.setAttribute('crossorigin', 'anonymous');
 });
@@ -110,18 +113,9 @@ function seekVideo(second: number) {
   <div class="full" data-tauri-drag-region>
     <div class="mask" data-tauri-drag-region :style="{ opacity: currentOpacity }"></div>
 
-    <video
-      data-tauri-drag-region
-      id="videoInstance"
-      autoplay
-      controls
-      controlslist="nodownload nofullscreen noremoteplayback"
-      height="360"
-      width="200"
-      preload="auto"
-      data-setup="{}"
-      class="video-box"
-    ></video>
+    <video data-tauri-drag-region id="videoInstance" autoplay controls
+      controlslist="nodownload nofullscreen noremoteplayback" height="360" width="200" preload="auto" data-setup="{}"
+      class="video-box"></video>
   </div>
 </template>
 
@@ -134,6 +128,7 @@ function seekVideo(second: number) {
   width: 100vw;
   height: 100vh;
 }
+
 .video-box {
   width: 100%;
   height: 100%;

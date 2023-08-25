@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from 'vue-router';
 
 const Dashboard = () => import('../pages/dashboard/index.vue');
 const VideoPage = () => import('../pages/dashboard/vod-details.vue');
+const VideoPlayer = () => import('../pages/player/index.vue');
 
 
 const routes: RouteRecordRaw[] = [
@@ -18,7 +19,12 @@ const routes: RouteRecordRaw[] = [
     component: VideoPage,
     meta: {},
   },
-
+  {
+    path: '/video/player',
+    name: '视频播放',
+    component: VideoPlayer,
+    meta: {},
+  },
 ];
 
 

@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 use rusqlite::{Connection, Result};
 use serde::{Deserialize, Serialize};
 lazy_static! {
-    static ref DB_FILE: &'static str = "E:\\database\\data.db";
+    static ref DB_FILE: &'static str = "C:\\database\\data.db";
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -20,6 +20,7 @@ pub fn init() -> Result<()> {
             description TEXT,
             actor VARCHAR(255),
             director VARCHAR(255),
+            episodes TEXT,
             release_date VARCHAR(255),
             alias VARCHAR(255),
             area VARCHAR(255),

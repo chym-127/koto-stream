@@ -7,10 +7,7 @@ declare module "*.vue" {
 }
 
 declare const ejs;
-
-declare global {
-  const Hls: any;
-}
+declare const Hls;
 declare const __TAURI__;
 declare module 'uuid';
 declare const videojs;

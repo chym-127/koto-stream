@@ -18,6 +18,7 @@ pub struct Video {
     pub score: Option<String>,
     pub class: Option<String>,
     pub otitle: Option<String>,
+    pub episodes: Option<String>,
 }
 
 pub fn all(p: &super::super::ListVideoReq) -> Result<Vec<Video>, Error> {
@@ -35,7 +36,7 @@ pub fn all(p: &super::super::ListVideoReq) -> Result<Vec<Video>, Error> {
         alias,
         score,
         class,
-        otitle FROM videos LIMIT ?1 OFFSET ?2",
+        otitle,episodes FROM videos LIMIT ?1 OFFSET ?2",
     )?;
     // let person_iter = stmt.unwrap().query([]);
     let person_iter = stmt.query_map(params![p.page_size, p.page_num - 1], |row| {
@@ -52,6 +53,7 @@ pub fn all(p: &super::super::ListVideoReq) -> Result<Vec<Video>, Error> {
             score: row.get(9)?,
             class: row.get(10)?,
             otitle: row.get(11)?,
+            episodes: row.get(12)?,
         })
     })?;
 
@@ -76,7 +78,7 @@ pub fn create(t: &Video) -> Result<(), Error> {
             alias,
             score,
             class,
-            otitle) VALUES (?1, ?2,?3,?4, ?5,?6,?7, ?8,?9,?10, ?11)",
+            otitle,episodes) VALUES (?1, ?2,?3,?4, ?5,?6,?7, ?8,?9,?10, ?11,?12)",
         (
             &t.title,
             &t.image,
@@ -89,6 +91,7 @@ pub fn create(t: &Video) -> Result<(), Error> {
             &t.score,
             &t.class,
             &t.otitle,
+            &t.episodes,
         ),
     )?;
 
@@ -111,7 +114,8 @@ pub fn update(t: &Video) -> Result<(), Error> {
         score = ?9,
         class = ?10 , 
         otitle = ?11 , 
-        WHERE id = ?12",
+        episodes =?12,
+        WHERE id = ?13",
         (
             &t.title,
             &t.image,
@@ -124,6 +128,7 @@ pub fn update(t: &Video) -> Result<(), Error> {
             &t.score,
             &t.class,
             &t.otitle,
+            &t.episodes,
             &t.id,
         ),
     )?;
@@ -144,7 +149,7 @@ pub fn find_one(id: usize) -> Result<Option<Video>, Error> {
     alias,
     score,
     class,
-    otitle FROM videos WHERE id = ?1",
+    otitle,episodes FROM videos WHERE id = ?1",
     )?;
     let row: std::result::Result<Option<Video>, Error> = stmt.query_row(params!(id), |row| {
         Ok(Some(Video {
@@ -160,6 +165,45 @@ pub fn find_one(id: usize) -> Result<Option<Video>, Error> {
             score: row.get(9)?,
             class: row.get(10)?,
             otitle: row.get(11)?,
+            episodes: row.get(12)?,
+        }))
+    });
+    if let Err(QueryReturnedNoRows) = row {
+        return Ok(None);
+    }
+    row
+}
+
+pub fn find_by_name(title: String) -> Result<Option<Video>, Error> {
+    let conn = get_conn();
+    let mut stmt = conn.prepare(
+        "SELECT id, title,
+    image,
+    description,
+    actor,
+    director,
+    release_date,
+    area,
+    alias,
+    score,
+    class,
+    otitle,episodes FROM videos WHERE title = ?1",
+    )?;
+    let row: std::result::Result<Option<Video>, Error> = stmt.query_row(params!(title), |row| {
+        Ok(Some(Video {
+            id: row.get(0)?,
+            title: row.get(1)?,
+            image: row.get(2)?,
+            description: row.get(3)?,
+            actor: row.get(4)?,
+            director: row.get(5)?,
+            release_date: row.get(6)?,
+            area: row.get(7)?,
+            alias: row.get(8)?,
+            score: row.get(9)?,
+            class: row.get(10)?,
+            otitle: row.get(11)?,
+            episodes: row.get(12)?,
         }))
     });
     if let Err(QueryReturnedNoRows) = row {

@@ -31,7 +31,7 @@
                     if (currentVod) {
                         index = getChildIndex(currentVod)
                         title = currentVod.innerText
-                        window.m3u8s[index] = {
+                        window.episodes[index] = {
                             title: title,
                             url: myUrl,
                             index: index + 1
@@ -50,7 +50,7 @@ function getChildIndex(node) {
     return Array.prototype.indexOf.call(node.parentNode.childNodes, node);
 }
 (function () {
-    window.m3u8s = {}
+    window.episodes = {}
     let el = document.createElement("button")
     el.innerText = "采集视频"
     el.style.position = "fixed"
@@ -66,15 +66,14 @@ function getChildIndex(node) {
 })();
 
 window.saveVod = function () {
-    let MOVS = { mapper: {} }
+    let MOVS = {}
     try {
-        MOVS = JSON.parse(localStorage.getItem("MOVS"))
+        MOVS = JSON.parse(localStorage.getItem("MOVS")) || {}
     } catch (error) {
+        MOVS = {}
     }
     let doms = document.getElementsByTagName('meta')
-    let obj = {
-        m3u8s: ''
-    }
+    let obj = {}
     if (doms && doms.length) {
         for (let i = 0; i < doms.length; i++) {
             let el = doms[i]
@@ -90,8 +89,9 @@ window.saveVod = function () {
 
         }
     }
-    obj.m3u8s = window.m3u8s
-    MOVS.mapper[window.infoid] = obj
+    let result = Object.keys(window.episodes).map((key) => window.episodes[key]);
+    obj["episodes"] = result
+    MOVS[window.infoid] = obj
     localStorage.setItem("MOVS", JSON.stringify(MOVS))
 }
 

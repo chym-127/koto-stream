@@ -30,8 +30,14 @@ struct Resp<T> {
 struct Empty([i8; 0]);
 
 #[tauri::command]
-fn handle_create_video(t: video::Video) -> Resp<Empty> {
-    let _ = video::create(&t);
+fn handle_create_video(mut t: video::Video) -> Resp<Empty> {
+    let row = video::find_by_name(t.title.clone().unwrap());
+    if let Ok(Some(r)) = row {
+        t.id = r.id;
+        let _ = video::update(&t);
+    } else {
+        let _ = video::create(&t);
+    }
     Resp {
         data: None,
         message: "success".to_string(),

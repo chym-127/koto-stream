@@ -7,6 +7,7 @@
       <a-layout>
         <!-- <a-layout-header></a-layout-header> -->
         <a-layout-content class="bg-w">
+          <button class="back-btn" @click="back" v-if="route.path !== '/'">Back</button>
           <router-view></router-view>
         </a-layout-content>
         <!-- <a-layout-footer>Footer</a-layout-footer> -->
@@ -17,9 +18,27 @@
 
 <script setup lang="ts">
 import Menu from './components/menu/index.vue';
+import { useRouter, useRoute } from 'vue-router';
+
+const router = useRouter()
+const route = useRoute()
+
+
+function back() {
+  router.go(-1)
+}
 </script>
 
 <style lang="less" scoped>
+.back-btn {
+  z-index: 9;
+  padding: 2px 6px;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
 .ant-layout-sider {
   background-color: var(--menu_bg-color);
   // border-right: 1px solid #f0f0f0;
