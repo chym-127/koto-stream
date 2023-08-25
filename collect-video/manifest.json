@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "HoldData",
+  "description": "Some Desc.",
+  "version": "1.1",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.dandanzan.com/*"
+      ],
+      "run_at": "document_start",
+      "js": [
+        "contentscript.js",
+        "inject.js"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "inject.js"
+      ],
+      "matches": [
+        "https://www.dandanzan.com/*"
+      ]
+    }
+  ]
+}
