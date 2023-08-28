@@ -55,7 +55,9 @@ async function openFile() {
     ],
   });
   if (selected !== null) {
+
     url.value = convertFileSrc(selected);
+    console.log(selected, url);
     videoInstance.src = url.value;
     // hls.loadSource(url.value);
   }
@@ -114,18 +116,9 @@ function seekVideo(second: number) {
   <div class="full" data-tauri-drag-region>
     <div class="mask" data-tauri-drag-region :style="{ opacity: currentOpacity }"></div>
 
-    <video
-      data-tauri-drag-region
-      id="videoInstance"
-      autoplay
-      controls
-      controlslist="nodownload nofullscreen noremoteplayback"
-      height="360"
-      width="200"
-      preload="auto"
-      data-setup="{}"
-      class="video-box"
-    ></video>
+    <video data-tauri-drag-region id="videoInstance" autoplay controls
+      controlslist="nodownload nofullscreen noremoteplayback" height="360" width="200" preload="auto" data-setup="{}"
+      class="video-box"></video>
   </div>
 </template>
 

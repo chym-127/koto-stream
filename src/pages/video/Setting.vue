@@ -1,13 +1,6 @@
 <template>
-  <a-drawer
-    title="设置"
-    :width="720"
-    @afterVisibleChange="afterVisibleChange"
-    :visible="props.visible"
-    :body-style="{ paddingBottom: '80px' }"
-    :footer-style="{ textAlign: 'right' }"
-    @close="onClose"
-  >
+  <a-drawer title="设置" :width="720" @afterVisibleChange="afterVisibleChange" :visible="props.visible"
+    :body-style="{ paddingBottom: '80px' }" :footer-style="{ textAlign: 'right' }" @close="onClose">
     <a-form :model="form" :rules="rules" layout="vertical">
       <a-row :gutter="16">
         <a-col :span="12">
@@ -55,7 +48,7 @@
           <a-form-item label="背景墙">
             <a-input-group compact>
               <a-input v-model:value="form.bg" style="width: calc(100% - 100px)" placeholder="请输入背景墙图片" />
-              <a-button type="primary" style="width: 100px" @click="saveToLocal(form.bg!)">下载到本地</a-button>
+              <a-button type="primary" style="width: 100px" @click="saveToLocal(form.bg!, 'image.webp')">下载到本地</a-button>
             </a-input-group>
           </a-form-item>
         </a-col>
@@ -80,7 +73,10 @@
 import { invoke } from '@tauri-apps/api/tauri';
 import { reactive, toRaw } from 'vue';
 import { Form } from 'ant-design-vue';
+import { convertFileSrc } from '@tauri-apps/api/tauri';
 import type { Rule } from 'ant-design-vue/es/form';
+
+
 const props = defineProps<{
   visible: boolean;
   info: VideoInfo;
@@ -149,9 +145,18 @@ function handleUpdateVideo(data: VideoInfo) {
   });
 }
 
-function saveToLocal(url: string) {
-  invoke('handle_file_to_local', {
-    t: {},
-  }).then((resp: any) => {});
+function saveToLocal(url: string, file_name: string) {
+  invoke('handle_down_file', {
+    req: {
+      url: url,
+      path: String(form.id),
+      file_name: file_name,
+    },
+  }).then((resp: any) => {
+    Object.assign(form, { bg: convertFileSrc(resp.data) })
+  })
+    .catch(e => {
+      console.log(e);
+    });
 }
 </script>

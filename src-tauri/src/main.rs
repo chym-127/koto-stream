@@ -17,6 +17,7 @@ fn main() {
             handle_list_video,
             handle_update_video,
             handle_del_video,
+            handle_down_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -120,5 +121,36 @@ fn handle_get_video(id: usize) -> Resp<video::Video> {
             message: "记录不存在".to_string(),
             code: 101,
         };
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct DownFileReq {
+    url: String,
+    path: String,
+    file_name: String,
+}
+
+use std::fs::File;
+use std::io;
+use std::path::Path;
+
+#[tauri::command]
+fn handle_down_file(req: DownFileReq) -> Resp<String> {
+    println!("{:?}", req);
+    let mut resp = reqwest::blocking::get(req.url).expect("request failed");
+    let output_path = Path::new(&config::get_work_path())
+        .join(req.path)
+        .join(req.file_name);
+    let mut out = File::create(&output_path).expect("failed to create file");
+    let msg = io::copy(&mut resp, &mut out);
+    if let Err(e) = msg {
+        println!("failed to copy file")
+    }
+    println!("success");
+    Resp {
+        data: Some(output_path.as_path().display().to_string()),
+        message: "success".to_string(),
+        code: 200,
     }
 }
