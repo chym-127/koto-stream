@@ -2,11 +2,13 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+mod config;
 mod db;
 use crate::db::video;
 use serde::{Deserialize, Serialize};
 
 fn main() {
+    let _ = config::init();
     let _ = db::init();
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -34,7 +36,10 @@ fn handle_create_video(mut t: video::Video) -> Resp<Empty> {
     let row = video::find_by_name(t.title.clone().unwrap());
     if let Ok(Some(r)) = row {
         t.id = r.id;
-        let _ = video::update(&t);
+        let err = video::update(&t);
+        if let Err(err) = err {
+            println!("{:?}", err);
+        }
     } else {
         let _ = video::create(&t);
     }

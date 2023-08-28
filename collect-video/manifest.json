@@ -1,14 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "HoldData",
-  "description": "Some Desc.",
+  "name": "VideoCollect",
+  "description": "视频采集.",
   "version": "1.1",
   "content_scripts": [
     {
       "matches": [
-        "https://www.dandanzan.com/*"
+        "https://www.dandanzan.com/*",
+        "https://www.dandanzan.club/*"
       ],
-      "run_at": "document_start",
+      "run_at": "document_end",
       "js": [
         "contentscript.js",
         "inject.js"
@@ -21,7 +22,8 @@
         "inject.js"
       ],
       "matches": [
-        "https://www.dandanzan.com/*"
+        "https://www.dandanzan.com/*",
+        "https://www.dandanzan.club/*"
       ]
     }
   ]

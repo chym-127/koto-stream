@@ -22,7 +22,7 @@
     XHR.send = function (postData) {
         // console.warn(this._url, postData);
         this.addEventListener('load', function () {
-            var myUrl = this._url ? this._url.toLowerCase() : this._url;
+            var myUrl = this._url;
             if (myUrl) {
                 if (myUrl.indexOf('.m3u8') !== -1 && myUrl.indexOf('hls') !== -1) {
                     let currentVod = document.querySelector("li[class='on']")
@@ -46,9 +46,13 @@
     };
 
 })(XMLHttpRequest);
+
 function getChildIndex(node) {
     return Array.prototype.indexOf.call(node.parentNode.childNodes, node);
 }
+
+
+
 (function () {
     window.episodes = {}
     let el = document.createElement("button")
@@ -61,7 +65,9 @@ function getChildIndex(node) {
         window.saveVod()
     })
     if (document.body) {
-        document.body.appendChild(el)
+        setTimeout(() => {
+            document.body.appendChild(el)
+        }, 3000);
     }
 })();
 
@@ -72,6 +78,25 @@ window.saveVod = function () {
     } catch (error) {
         MOVS = {}
     }
+
+    if (location.href.indexOf('.com') !== -1) {
+        MOVS = getVideoInfoFromCom(MOVS)
+    }
+
+    if (location.href.indexOf('.club') !== -1) {
+        MOVS = getVideoInfoFromClub(MOVS)
+    }
+
+    localStorage.setItem("MOVS", JSON.stringify(MOVS))
+}
+
+
+function getVideoInfoFromClub() {
+
+}
+
+
+function getVideoInfoFromCom(MOVS) {
     let doms = document.getElementsByTagName('meta')
     let obj = {}
     if (doms && doms.length) {
@@ -92,6 +117,6 @@ window.saveVod = function () {
     let result = Object.keys(window.episodes).map((key) => window.episodes[key]);
     obj["episodes"] = result
     MOVS[window.infoid] = obj
-    localStorage.setItem("MOVS", JSON.stringify(MOVS))
+    return MOVS
 }
 

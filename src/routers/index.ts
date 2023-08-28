@@ -2,7 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
 
 const Dashboard = () => import('../pages/dashboard/index.vue');
-const VideoPage = () => import('../pages/dashboard/vod-details.vue');
+const VideoPage = () => import('../pages/video/index.vue');
 const VideoPlayer = () => import('../pages/player/index.vue');
 
 

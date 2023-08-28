@@ -1,8 +1,9 @@
 <template>
   <div class="full">
-    <div class="bg full"></div>
+    <div class="bg full" :style="{ backgroundImage: 'url(' + video.bg + ')' }"></div>
     <div class="mask full"></div>
-    <div class="flex-row info-box" style="padding: 30px 40px">
+    <button class="koto-btn" @click="settingVisible = true">Setting</button>
+    <div class="flex-row info-box" style="padding: 50px 40px 30px 40px">
       <div class="left flex-1">
         <div class="title ellips-1">
           <span>{{ video.title }}</span>
@@ -21,16 +22,11 @@
           <span class="c-999">主演：</span>
           <span>{{ video.actor }}</span>
         </div>
-        <div class="desc ellips-6 font-14-400 c-c9c9c mt-12">
+        <div class="desc ellips-8 font-14-400 c-c9c9c mt-12">
           <span class="c-999">剧情简介：</span>
           <span>
             {{ video.description }}
           </span>
-        </div>
-        <div class="episodes flex-row mt-24">
-          <div class="episode-item" v-for="item in video.episodes" @click="playVideo(item)">
-            <span class="font-14-400 c-000">{{ item.title }}</span>
-          </div>
         </div>
       </div>
       <div class="right">
@@ -40,19 +36,28 @@
         </div>
       </div>
     </div>
+    <div style="padding: 0 40px">
+      <div class="episodes flex-row">
+        <div class="episode-item" v-for="item in video.episodes" @click="playVideo(item)">
+          <span class="font-14-400 c-000">{{ item.title }}</span>
+        </div>
+      </div>
+    </div>
 
-    <!-- <div class="btn mt-12">
-      <span class="font-16-600 c-000">Play Now</span>
-    </div> -->
+    <Setting v-model:visible="settingVisible" :info="video" @update="updateSetting"></Setting>
   </div>
 </template>
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
 import { reactive, ref } from 'vue';
 import { invoke } from '@tauri-apps/api/tauri';
+import { message } from 'ant-design-vue';
 
+import Setting from './Setting.vue';
+
+const settingVisible = ref<boolean>(false);
 const route = useRoute();
-const router = useRouter()
+const router = useRouter();
 const value = ref(1);
 const video = reactive<any>({});
 
@@ -64,14 +69,18 @@ function handleGetVideo() {
   invoke('handle_get_video', {
     id: Number(id),
   }).then((resp: any) => {
+    console.log(resp.data);
 
     Object.assign(video, resp.data);
-    video.episodes = JSON.parse(video.episodes)
-    console.log(video);
-
+    video.episodes = JSON.parse(video.episodes);
   });
 }
 
+function updateSetting() {
+  message.success('更新成功');
+  settingVisible.value = false;
+  handleGetVideo();
+}
 
 function playVideo(item: any) {
   router.push({
@@ -102,7 +111,8 @@ function playVideo(item: any) {
 
 .episodes {
   flex-wrap: wrap;
-
+  position: relative;
+  z-index: 4;
   .episode-item {
     width: 100px;
     height: 32px;
@@ -116,17 +126,18 @@ function playVideo(item: any) {
   }
 }
 
-
 .mask {
   position: absolute;
-  background: linear-gradient(90deg,
-      rgba(1, 1, 1, 1),
-      rgba(1, 1, 1, 0.9),
-      rgba(1, 1, 1, 0.8),
-      rgba(1, 1, 1, 0.7),
-      rgba(1, 1, 1, 0.4),
-      rgba(1, 1, 1, 0),
-      rgba(1, 1, 1, 0));
+  background: linear-gradient(
+    90deg,
+    rgba(1, 1, 1, 1),
+    rgba(1, 1, 1, 0.9),
+    rgba(1, 1, 1, 0.8),
+    rgba(1, 1, 1, 0.7),
+    rgba(1, 1, 1, 0.4),
+    rgba(1, 1, 1, 0),
+    rgba(1, 1, 1, 0)
+  );
   opacity: 0.7;
   top: 0;
   left: 0;
@@ -164,14 +175,15 @@ function playVideo(item: any) {
     height: auto;
 
     .pic {
-      width: 260px;
-      height: 390px;
+      width: 240px;
+      height: 350px;
       position: relative;
+      border-radius: 8px;
 
       img {
-        width: 260px;
-        height: 390px;
-        border-radius: 4px;
+        width: 240px;
+        height: 350px;
+        border-radius: 8px;
       }
 
       .mask1 {
@@ -181,6 +193,7 @@ function playVideo(item: any) {
         width: 100%;
         height: 100%;
         background-color: #000;
+        border-radius: 8px;
         opacity: 0.3;
       }
     }
@@ -192,7 +205,6 @@ function playVideo(item: any) {
   top: 0;
   left: 0;
   z-index: 1;
-  background: url('http://img5.mtime.cn/pi/2023/08/24/154656.63133360_1000X1000.jpg');
   background-repeat: space;
   background-position: center;
   background-size: auto 100%;
@@ -200,5 +212,11 @@ function playVideo(item: any) {
 
 .c-c9c9c {
   color: #c9c9c9;
+}
+
+.koto-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
 </style>

@@ -1,17 +1,13 @@
 pub mod video;
 
-use lazy_static::lazy_static;
+use super::config;
 use rusqlite::{Connection, Result};
 use serde::{Deserialize, Serialize};
-lazy_static! {
-    static ref DB_FILE: &'static str = "C:\\database\\data.db";
-}
-
 #[derive(Debug, Deserialize, Serialize)]
 struct Total(usize);
 
 pub fn init() -> Result<()> {
-    let conn: Connection = Connection::open(*DB_FILE)?;
+    let conn: Connection = Connection::open(config::get_db_path())?;
     conn.execute(
         "CREATE TABLE IF NOT EXISTS videos (
             id   INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +22,8 @@ pub fn init() -> Result<()> {
             area VARCHAR(255),
             score VARCHAR(255),
             class VARCHAR(255),
-            otitle VARCHAR(255)
+            otitle VARCHAR(255),
+            bg VARCHAR(255)
         )",
         (), // empty list of parameters.
     )?;
@@ -35,6 +32,6 @@ pub fn init() -> Result<()> {
 }
 
 pub fn get_conn() -> Connection {
-    let res: std::result::Result<Connection, rusqlite::Error> = Connection::open(*DB_FILE);
+    let res: std::result::Result<Connection, rusqlite::Error> = Connection::open(config::get_db_path());
     res.unwrap()
 }

@@ -5,16 +5,17 @@ import { convertFileSrc } from '@tauri-apps/api/tauri';
 import { onMounted, ref } from 'vue';
 import { register, unregisterAll } from '@tauri-apps/api/globalShortcut';
 import { useRoute } from 'vue-router';
+import Hls from 'hls.js';
 
 let url = ref('');
 let currentOpacity = ref(0);
 let currentOpacityIndex = 0;
-const route = useRoute()
-let m3u8_url = route.query.url
+const route = useRoute();
+let m3u8_url: any = route.query.url;
 
 let opacitys = [0, 0.2, 0.4, 0.6, 0.8, 1];
 let videoInstance: any = null;
-let hls: any = null;
+let hls: Hls | null = null;
 onMounted(() => {
   videoInstance = document.getElementById('videoInstance');
   if (Hls.isSupported()) {
@@ -113,9 +114,18 @@ function seekVideo(second: number) {
   <div class="full" data-tauri-drag-region>
     <div class="mask" data-tauri-drag-region :style="{ opacity: currentOpacity }"></div>
 
-    <video data-tauri-drag-region id="videoInstance" autoplay controls
-      controlslist="nodownload nofullscreen noremoteplayback" height="360" width="200" preload="auto" data-setup="{}"
-      class="video-box"></video>
+    <video
+      data-tauri-drag-region
+      id="videoInstance"
+      autoplay
+      controls
+      controlslist="nodownload nofullscreen noremoteplayback"
+      height="360"
+      width="200"
+      preload="auto"
+      data-setup="{}"
+      class="video-box"
+    ></video>
   </div>
 </template>
 
