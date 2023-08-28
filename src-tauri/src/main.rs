@@ -42,6 +42,8 @@ fn handle_create_video(mut t: video::Video) -> Resp<Empty> {
         }
     } else {
         let _ = video::create(&t);
+        //创建对应的目录
+        video::create_video_dir(&t);
     }
     Resp {
         data: None,

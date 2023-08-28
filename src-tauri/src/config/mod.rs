@@ -35,3 +35,19 @@ pub fn get_db_path() -> String {
         "data.db".to_string()
     }
 }
+
+
+pub fn get_work_path() -> String {
+    if let Some(user_dirs) = UserDirs::new() {
+        let path = user_dirs
+            .document_dir()
+            .unwrap()
+            .join(*WORK_PATH)
+            .to_str()
+            .unwrap()
+            .to_string();
+        return path;
+    } else {
+        "".to_string()
+    }
+}

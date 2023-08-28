@@ -53,7 +53,10 @@
         </a-col>
         <a-col :span="12">
           <a-form-item label="背景墙">
-            <a-input v-model:value="form.bg" style="width: 100%" placeholder="请输入背景墙图片" />
+            <a-input-group compact>
+              <a-input v-model:value="form.bg" style="width: calc(100% - 100px)" placeholder="请输入背景墙图片" />
+              <a-button type="primary" style="width: 100px" @click="saveToLocal(form.bg!)">下载到本地</a-button>
+            </a-input-group>
           </a-form-item>
         </a-col>
       </a-row>
@@ -138,11 +141,17 @@ function handleUpdateVideo(data: VideoInfo) {
     episodes: JSON.stringify(data.episodes),
   };
   console.log(resq);
-  
+
   invoke('handle_update_video', {
     t: resq,
   }).then((resp: any) => {
     emit('update');
   });
+}
+
+function saveToLocal(url: string) {
+  invoke('handle_file_to_local', {
+    t: {},
+  }).then((resp: any) => {});
 }
 </script>

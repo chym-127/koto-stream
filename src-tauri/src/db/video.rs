@@ -1,8 +1,11 @@
 use super::get_conn;
 use rusqlite::Error::QueryReturnedNoRows;
 use rusqlite::{params, Error, Result};
-
+use super::config;
 use serde::{Deserialize, Serialize};
+use std::fs;
+use std::path::Path;
+
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Video {
@@ -67,6 +70,16 @@ pub fn all(p: &super::super::ListVideoReq) -> Result<Vec<Video>, Error> {
     }
 
     Ok(resp)
+}
+
+
+pub fn create_video_dir(t: &Video){
+    let resp = find_by_name(t.title.clone().unwrap());
+    if let Ok(Some(r)) = resp{
+        let path_str = config::get_work_path();
+        let path = Path::new(&path_str).join(r.id.unwrap().to_string());
+        _ = fs::create_dir_all(path.clone());
+    }
 }
 
 pub fn create(t: &Video) -> Result<(), Error> {
