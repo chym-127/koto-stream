@@ -91,8 +91,33 @@ window.saveVod = function () {
 }
 
 
-function getVideoInfoFromClub() {
+function getVideoInfoFromClub(MOVS) {
+    console.log('getVideoInfoFromClub');
+    try {
+        let metaDom = document.getElementsByClassName('product-header')[0]
+        let obj = {}
 
+        let titleDom = document.getElementsByClassName("product-title")[0]
+        obj.title = titleDom.textContent
+        obj.score = titleDom.getElementsByClassName('rate')[0].innerText
+
+        let arrDom = document.getElementsByClassName('product-excerpt')
+        let arrKeys = ['director', 'actor', 'area', 'alias', 'description']
+        for (let index = 0; index < arrDom.length - 1; index++) {
+            const element = arrDom[index];
+            let value = element.getElementsByTagName("span")[0].innerText
+            obj[arrKeys[index]] = value
+        }
+
+        let result = Object.keys(window.episodes).map((key) => window.episodes[key]);
+        obj["episodes"] = result
+        MOVS[obj.title] = obj
+    } catch (error) {
+        console.log(error);
+    }
+
+
+    return MOVS
 }
 
 
