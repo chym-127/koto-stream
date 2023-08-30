@@ -7,7 +7,6 @@ import DefaultLayout from './pages/layout/index.vue';
 
 <template>
   <div class="w-screen h-screen">
-    
     <DefaultLayout></DefaultLayout>
   </div>
 </template>

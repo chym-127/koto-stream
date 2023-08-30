@@ -55,9 +55,7 @@ async function openFile() {
     ],
   });
   if (selected !== null) {
-
     url.value = convertFileSrc(selected);
-    console.log(selected, url);
     videoInstance.src = url.value;
     // hls.loadSource(url.value);
   }

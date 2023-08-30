@@ -69,8 +69,6 @@ function handleGetVideo() {
   invoke('handle_get_video', {
     id: Number(id),
   }).then((resp: any) => {
-    console.log(resp.data);
-
     Object.assign(video, resp.data);
     video.episodes = JSON.parse(video.episodes);
   });

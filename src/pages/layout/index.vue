@@ -10,14 +10,15 @@
           <button class="back-btn" @click="back" v-if="route.path !== '/'">Back</button>
           <router-view></router-view>
         </a-layout-content>
-        <!-- <a-layout-footer>Footer</a-layout-footer> -->
       </a-layout>
     </a-layout>
+    <DownloadCenter></DownloadCenter>
   </div>
 </template>
 
 <script setup lang="ts">
 import Menu from './components/menu/index.vue';
+import DownloadCenter from './components/DownloadCenter.vue'
 import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter()

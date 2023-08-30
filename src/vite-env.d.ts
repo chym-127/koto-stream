@@ -10,4 +10,5 @@ declare const ejs;
 // declare const Hls;
 declare const __TAURI__;
 declare module 'uuid';
+declare module 'lodash.clonedeep';
 declare const videojs;

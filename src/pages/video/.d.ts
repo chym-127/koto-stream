@@ -16,6 +16,7 @@ interface VideoInfo {
 }
 
 interface Episode {
+    index: number,
     title: string,
     url: string,
     file_path: string,

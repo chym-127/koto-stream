@@ -15,7 +15,16 @@
       "all": true,
       "shell": {
         "all": false,
-        "open": true
+        "execute": true,
+        "sidecar": true,
+        "open": true,
+        "scope": [
+          {
+            "name": "m3u8_downloader",
+            "cmd": "m3u8_downloader",
+            "args": true
+          }
+        ]
       },
       "path": {
         "all": true

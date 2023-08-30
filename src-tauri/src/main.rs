@@ -17,7 +17,8 @@ fn main() {
             handle_list_video,
             handle_update_video,
             handle_del_video,
-            handle_down_file
+            handle_down_file,
+            handle_get_work_path
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -154,3 +155,14 @@ fn handle_down_file(req: DownFileReq) -> Resp<String> {
         code: 200,
     }
 }
+
+
+#[tauri::command]
+fn handle_get_work_path() -> Resp<String> {
+    Resp {
+        data: Some(config::get_work_path()),
+        message: "success".to_string(),
+        code: 200,
+    }
+}
+
