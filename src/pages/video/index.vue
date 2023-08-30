@@ -2,7 +2,7 @@
   <div class="full">
     <div class="bg full" :style="{ backgroundImage: 'url(' + video.bg + ')' }"></div>
     <div class="mask full"></div>
-    <button class="koto-btn" @click="settingVisible = true">Setting</button>
+    <button class="koto-btn" @click="showSetting">Setting</button>
     <div class="flex-row info-box" style="padding: 50px 40px 30px 40px">
       <div class="left flex-1">
         <div class="title ellips-1">
@@ -44,7 +44,7 @@
       </div>
     </div>
 
-    <Setting v-model:visible="settingVisible" :info="video" @update="updateSetting"></Setting>
+    <Setting v-model:visible="settingVisible" ref="setting" :info="video" @update="updateSetting"></Setting>
   </div>
 </template>
 <script setup lang="ts">
@@ -52,6 +52,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { reactive, ref } from 'vue';
 import { invoke } from '@tauri-apps/api/tauri';
 import { message } from 'ant-design-vue';
+import { exists, BaseDirectory } from '@tauri-apps/api/fs';
 
 import Setting from './Setting.vue';
 
@@ -60,6 +61,12 @@ const route = useRoute();
 const router = useRouter();
 const value = ref(1);
 const video = reactive<any>({});
+const setting = ref<InstanceType<typeof Setting> | null>(null);
+
+const showSetting = () => {
+  settingVisible.value = true;
+  setting.value?.resetInfo();
+};
 
 const id = route.query.id || null;
 if (id) {
@@ -71,6 +78,13 @@ function handleGetVideo() {
   }).then((resp: any) => {
     Object.assign(video, resp.data);
     video.episodes = JSON.parse(video.episodes);
+    video.episodes.forEach(async (episode: Episode) => {
+      let file_path = video.id + '\\' + episode.index + '.mp4';
+      let resp: any = await invoke('handle_exists_file', { path: file_path });
+      if (resp.data.exists) {
+        episode.file_path = resp.data.path;
+      }
+    });
   });
 }
 
@@ -85,6 +99,7 @@ function playVideo(item: any) {
     path: '/video/player',
     query: {
       url: item.url,
+      file_path: item.file_path,
     },
   });
 }

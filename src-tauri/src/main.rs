@@ -18,7 +18,8 @@ fn main() {
             handle_update_video,
             handle_del_video,
             handle_down_file,
-            handle_get_work_path
+            handle_get_work_path,
+            handle_exists_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -138,14 +139,13 @@ use std::path::Path;
 
 #[tauri::command]
 fn handle_down_file(req: DownFileReq) -> Resp<String> {
-    println!("{:?}", req);
     let mut resp = reqwest::blocking::get(req.url).expect("request failed");
     let output_path = Path::new(&config::get_work_path())
         .join(req.path)
         .join(req.file_name);
     let mut out = File::create(&output_path).expect("failed to create file");
     let msg = io::copy(&mut resp, &mut out);
-    if let Err(e) = msg {
+    if let Err(_) = msg {
         println!("failed to copy file")
     }
     println!("success");
@@ -156,7 +156,6 @@ fn handle_down_file(req: DownFileReq) -> Resp<String> {
     }
 }
 
-
 #[tauri::command]
 fn handle_get_work_path() -> Resp<String> {
     Resp {
@@ -166,3 +165,21 @@ fn handle_get_work_path() -> Resp<String> {
     }
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ExistsFileAns {
+    exists: bool,
+    path: String,
+}
+#[tauri::command]
+fn handle_exists_file(path: String) -> Resp<ExistsFileAns> {
+    let file_path = Path::new(&config::get_work_path()).join(path);
+    let exists = file_path.exists();
+    Resp {
+        data: Some(ExistsFileAns {
+            exists: exists,
+            path: file_path.as_path().display().to_string(),
+        }),
+        message: "success".to_string(),
+        code: 200,
+    }
+}

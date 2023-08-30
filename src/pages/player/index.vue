@@ -12,6 +12,7 @@ let currentOpacity = ref(0);
 let currentOpacityIndex = 0;
 const route = useRoute();
 let m3u8_url: any = route.query.url;
+let file_path: any = route.query.file_path;
 
 let opacitys = [0, 0.2, 0.4, 0.6, 0.8, 1];
 let videoInstance: any = null;
@@ -29,7 +30,12 @@ onMounted(() => {
     });
     // bind them together
     hls.attachMedia(videoInstance);
-    hls.loadSource(m3u8_url);
+    if (file_path) {
+      url.value = convertFileSrc(file_path);
+      videoInstance.src = url.value;
+    } else {
+      hls.loadSource(m3u8_url);
+    }
   }
   videoInstance.setAttribute('crossorigin', 'anonymous');
 });
@@ -114,9 +120,18 @@ function seekVideo(second: number) {
   <div class="full" data-tauri-drag-region>
     <div class="mask" data-tauri-drag-region :style="{ opacity: currentOpacity }"></div>
 
-    <video data-tauri-drag-region id="videoInstance" autoplay controls
-      controlslist="nodownload nofullscreen noremoteplayback" height="360" width="200" preload="auto" data-setup="{}"
-      class="video-box"></video>
+    <video
+      data-tauri-drag-region
+      id="videoInstance"
+      autoplay
+      controls
+      controlslist="nodownload nofullscreen noremoteplayback"
+      height="360"
+      width="200"
+      preload="auto"
+      data-setup="{}"
+      class="video-box"
+    ></video>
   </div>
 </template>
 

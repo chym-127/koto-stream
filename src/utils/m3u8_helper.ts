@@ -117,6 +117,15 @@ class _M3u8Downloader {
             delete this._processMapper[uuid]
         }
     }
+
+    destroy() {
+        for (const key in this._processMapper) {
+            if (Object.prototype.hasOwnProperty.call(this._processMapper, key)) {
+                const p = this._processMapper[key];
+                p.kill()
+            }
+        }
+    }
 }
 
 const m3u8Downloader = new _M3u8Downloader()

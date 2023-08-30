@@ -2,7 +2,6 @@
   <a-drawer
     title="设置"
     :width="720"
-    @afterVisibleChange="afterVisibleChange"
     :visible="props.visible"
     :body-style="{ paddingBottom: '80px' }"
     :footer-style="{ textAlign: 'right' }"
@@ -86,12 +85,12 @@
                 <a-input v-model:value="record.url" placeholder="请输入url" />
               </template>
 
-              <template v-if="column.dataIndex === 'state'">
-                <span>{{ text === 1 ? '已下载' : '未下载' }}</span>
+              <template v-if="column.dataIndex === 'file_path'">
+                <span>{{ text ? '已下载' : '未下载' }}</span>
               </template>
 
               <template v-if="column.dataIndex === 'action'">
-                <a-button type="link" @click="onDown(record)">下载</a-button>
+                <a-button type="link" @click="onDown(record)">{{ record.file_path ? '重新下载' : '下载' }}</a-button>
               </template>
             </template>
           </a-table>
@@ -148,9 +147,7 @@ const rules: Record<string, Rule[]> = {
 
 const useForm = Form.useForm;
 
-const { resetFields, validate, validateInfos, clearValidate } = useForm(form, rules, {
-  onValidate: (...args) => console.log(...args),
-});
+const { resetFields, validate, validateInfos, clearValidate } = useForm(form, rules);
 const onSubmit = () => {
   validate()
     .then(() => {
@@ -167,11 +164,11 @@ const onClose = () => {
   emit('update:visible', false);
 };
 
-const afterVisibleChange = (visible: boolean) => {
-  if (visible) {
-    Object.assign(form, props.info);
-  }
+const resetInfo = () => {
+  Object.assign(form, props.info);
 };
+
+defineExpose({ resetInfo });
 
 function handleUpdateVideo(data: VideoInfo) {
   let resq = {
@@ -229,7 +226,7 @@ const columns = [
   {
     title: '状态',
     width: 80,
-    dataIndex: 'state',
+    dataIndex: 'file_path',
   },
   {
     title: '操作',

@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { onUnmounted, reactive, ref } from 'vue';
 import m3u8Downloader, { M3u8DownTask } from '../../../utils/m3u8_helper';
 import cloneDeep from 'lodash.clonedeep';
 
@@ -52,7 +52,7 @@ const taskList = reactive<M3u8DownTask[]>([]);
 const columns = [
   {
     title: '标题',
-    width: 120,
+    width: 240,
     dataIndex: 'name',
   },
   {
@@ -76,7 +76,12 @@ const columns = [
   },
 ];
 
-setInterval(() => {
+onUnmounted(() => {
+  m3u8Downloader.destroy();
+  clearInterval(p);
+});
+
+let p = setInterval(() => {
   taskList.splice(0);
   Object.assign(taskList, m3u8Downloader.getAllTask());
 }, 100);
