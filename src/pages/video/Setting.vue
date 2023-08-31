@@ -101,7 +101,7 @@
       </div>
     </div>
     <a-space style="position: absolute; top: 8px; right: 24px">
-      <a-button @click=" onClose ">取消</a-button>
+      <!-- <a-button @click=" onClose ">取消</a-button> -->
       <a-popconfirm title="你确认要删除这个资源吗?" ok-text="Yes" cancel-text="No" @confirm="handleDeleteVideo()">
         <a-button type="primary" danger>删除</a-button>
       </a-popconfirm>

@@ -57,7 +57,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { onUnmounted, reactive, ref } from 'vue';
 import { invoke } from '@tauri-apps/api/tauri';
 import { message } from 'ant-design-vue';
-import defaultBg from '../../assets/image/bg.jpg';
+import defaultBg from '../../assets/image/bg.webp';
 import Setting from './Setting.vue';
 import store from '../../utils/store';
 import eventBus, { EventMsg } from '../../utils/event_bus';
@@ -188,7 +188,6 @@ onUnmounted(() => {
 
 .info-box {
   justify-content: space-between;
-
   //   position: relative;
   .left {
     z-index: 3;
