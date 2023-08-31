@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { invoke } from '@tauri-apps/api/tauri';
 import DefaultLayout from './pages/layout/index.vue';
+import { message } from 'ant-design-vue';
+
+message.config({
+  top: `2px`,
+  duration: 2,
+  maxCount: 1,
+});
 </script>
 
 <template>

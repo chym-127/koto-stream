@@ -3,9 +3,27 @@
     <div class="app-name flex-row items-center p-4" data-tauri-drag-region>
       <span class="font-16-800">KOTO_STREAM</span>
     </div>
-    <div class="menu flex-row flex-1 ml-8" data-tauri-drag-region>
-      <div class="menu-item flex-row items-center" v-for="(item, index) in menus" @click="menuClick(item)" :key="index">
-        <span>{{ item.name }}</span>
+    <div class="menu flex-row flex-1 ml-8" style="justify-content: space-between" data-tauri-drag-region>
+      <div class="flex-row">
+        <div
+          class="menu-item flex-row items-center"
+          v-for="(item, index) in menus"
+          @click="menuClick(item)"
+          :key="index"
+        >
+          <span>{{ item.name }}</span>
+        </div>
+      </div>
+
+      <div class="flex-row">
+        <div
+          class="menu-item flex-row items-center"
+          v-for="(item, index) in customMenus"
+          @click="customMenuClick(item)"
+          :key="index"
+        >
+          <span>{{ item.name }}</span>
+        </div>
       </div>
     </div>
     <div class="action-btns flex-row" data-tauri-drag-region>
@@ -26,7 +44,7 @@
 <script setup lang="ts">
 import { appWindow } from '@tauri-apps/api/window';
 import eventBus, { EventMsg } from '../../../utils/event_bus';
-import { reactive } from 'vue';
+import { onUnmounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -34,12 +52,17 @@ const router = useRouter();
 interface Menu {
   id: string;
   name: string;
+  clickFunc?: () => void;
 }
 
 const menus = reactive<Menu[]>([
   {
     id: 'BACK',
     name: '返回',
+  },
+  {
+    id: 'REFRESH',
+    name: '刷新',
   },
   {
     id: 'DOWNLOAD_CENTER',
@@ -49,11 +72,13 @@ const menus = reactive<Menu[]>([
     id: 'IMPORT_VIDEO',
     name: '导入视频',
   },
-  {
-    id: 'REFRESH',
-    name: '刷新',
-  },
 ]);
+
+const customMenus = reactive<Menu[]>([]);
+
+const customMenuClick = (menu: Menu) => {
+  menu.clickFunc!();
+};
 
 const menuClick = (menu: Menu) => {
   if (menu.id === 'BACK') {
@@ -69,6 +94,17 @@ const menuClick = (menu: Menu) => {
     eventBus.publicize(msg);
   }
 };
+
+const setCustomMenuCallback = function (data: Menu[]) {
+  customMenus.splice(0);
+  Object.assign(customMenus, data);
+};
+
+eventBus.on('set-custom-menu', setCustomMenuCallback);
+
+onUnmounted(() => {
+  eventBus.off('set-custom-menu', setCustomMenuCallback);
+});
 
 const minimize = () => {
   appWindow.minimize();

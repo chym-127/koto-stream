@@ -1,22 +1,73 @@
 <script setup lang="ts">
 import { open } from '@tauri-apps/api/dialog';
 import { appWindow } from '@tauri-apps/api/window';
-import { convertFileSrc } from '@tauri-apps/api/tauri';
-import { onMounted, ref } from 'vue';
+import { convertFileSrc, invoke } from '@tauri-apps/api/tauri';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { register, unregisterAll } from '@tauri-apps/api/globalShortcut';
 import { useRoute } from 'vue-router';
 import Hls from 'hls.js';
+import eventBus, { EventMsg } from '../../utils/event_bus';
+import m3u8Downloader, { M3u8DownTask } from '../../utils/m3u8_helper';
+import store from '../../utils/store';
 
 let url = ref('');
-let currentOpacity = ref(0);
-let currentOpacityIndex = 0;
 const route = useRoute();
-let m3u8_url: any = route.query.url;
-let file_path: any = route.query.file_path;
+const currentVideo: VideoInfo = store.get('CURRENT_VIDEO');
+console.log(currentVideo);
 
-let opacitys = [0, 0.2, 0.4, 0.6, 0.8, 1];
+let currentEpisode: Episode | undefined;
+let index: number = Number(route.query.index);
+if (currentVideo) {
+  currentEpisode = currentVideo.episodes?.find((item) => {
+    return item.index === index;
+  });
+  console.log(currentEpisode);
+  
+}
+let m3u8_url: string = currentEpisode!.url;
+let file_path: any = currentEpisode?.file_path;
 let videoInstance: any = null;
 let hls: Hls | null = null;
+
+const setMenu = (menus: any) => {
+  let msg: EventMsg = {
+    id: 'set-custom-menu',
+    name: '设置菜单',
+    data: menus,
+  };
+  eventBus.publicize(msg);
+};
+const downloadToLocal = () => {
+  onDown(currentEpisode!);
+};
+let menus = [
+  {
+    id: 'DONWLOAD',
+    name: '下载到本地',
+    clickFunc: downloadToLocal,
+  },
+];
+
+let workPath = '';
+invoke('handle_get_work_path', {}).then((resp: any) => {
+  workPath = resp.data;
+  setMenu(menus);
+});
+const onDown = (e: Episode) => {
+  let task: M3u8DownTask = {
+    uuid: currentVideo.id + '-' + e.index,
+    name: currentVideo.title + '-' + e.title,
+    url: e.url,
+    workPath: workPath + '\\' + currentVideo.id,
+    outputFilePath: workPath + '\\' + currentVideo.id + '\\' + e.index + '.mp4',
+  };
+  m3u8Downloader.submitTask(task);
+};
+
+onUnmounted(() => {
+  setMenu([]);
+});
+
 onMounted(() => {
   videoInstance = document.getElementById('videoInstance');
   if (Hls.isSupported()) {
@@ -39,16 +90,6 @@ onMounted(() => {
   }
   videoInstance.setAttribute('crossorigin', 'anonymous');
 });
-
-function opacitysChange() {
-  let len = opacitys.length;
-  if (currentOpacityIndex === len - 1) {
-    currentOpacityIndex = 0;
-  } else {
-    currentOpacityIndex += 1;
-  }
-  currentOpacity.value = opacitys[currentOpacityIndex];
-}
 
 async function openFile() {
   const selected: any = await open({

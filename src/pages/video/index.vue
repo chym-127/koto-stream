@@ -3,17 +3,15 @@
     <div class="bg full" v-if="video.bg" :style="{ backgroundImage: 'url(' + video.bg + ')' }"></div>
     <div class="bg full" v-else :style="{ backgroundImage: 'url(' + defaultBg + ')' }"></div>
     <div class="mask full"></div>
-    <button class="koto-btn" @click="showSetting">Setting</button>
     <div class="flex-row info-box" style="padding: 20px 40px 30px 40px">
       <div class="left flex-1">
-        <div class="title ellips-1">
-          <span>{{ video.title }}</span>
+        <div class="ellips-1">
+          <span class="title">{{ video.title }}</span>
+          <span class="ml-16 font-28-600" style="color: #c6c6c6">({{ video.release_date }})</span>
         </div>
         <div class="c-fff font-16-400">
           <a-rate :count="1" v-model:value="value" />
           <span class="ml-4">{{ video.score }}/10</span>
-
-          <span class="ml-16">{{ video.release_date }}</span>
         </div>
         <div class="ellips-3 font-14-400 c-c9c9c mt-12">
           <span class="c-999">导演：</span>
@@ -56,11 +54,13 @@
 </template>
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { reactive, ref } from 'vue';
+import { onUnmounted, reactive, ref } from 'vue';
 import { invoke } from '@tauri-apps/api/tauri';
 import { message } from 'ant-design-vue';
 import defaultBg from '../../assets/image/bg.jpg';
 import Setting from './Setting.vue';
+import store from '../../utils/store';
+import eventBus, { EventMsg } from '../../utils/event_bus';
 
 const settingVisible = ref<boolean>(false);
 const route = useRoute();
@@ -70,8 +70,10 @@ const video = reactive<any>({});
 const setting = ref<InstanceType<typeof Setting> | null>(null);
 
 const showSetting = () => {
-  settingVisible.value = true;
-  setting.value?.resetInfo();
+  settingVisible.value = !settingVisible.value;
+  if (settingVisible.value) {
+    setting.value?.resetInfo();
+  }
 };
 
 const id = route.query.id || null;
@@ -101,14 +103,35 @@ function updateSetting() {
 }
 
 function playVideo(item: any) {
+  store.set('CURRENT_VIDEO', video, true);
   router.push({
     path: '/video/player',
     query: {
-      url: item.url,
-      file_path: item.file_path,
+      index: item.index,
     },
   });
 }
+
+const setMenu = (menus: any) => {
+  let msg: EventMsg = {
+    id: 'set-custom-menu',
+    name: '设置菜单',
+    data: menus,
+  };
+  eventBus.publicize(msg);
+};
+
+let menus = [
+  {
+    id: 'DONWLOAD',
+    name: '编辑视频',
+    clickFunc: showSetting,
+  },
+];
+setMenu(menus);
+onUnmounted(() => {
+  setMenu([]);
+});
 </script>
 
 <style lang="less" scoped>
@@ -174,7 +197,7 @@ function playVideo(item: any) {
     color: #fff;
 
     .title {
-      font-size: 48px;
+      font-size: 42px;
       font-weight: 800;
       letter-spacing: 10px;
     }

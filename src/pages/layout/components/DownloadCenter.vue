@@ -4,6 +4,7 @@
     :width="820"
     :zIndex="2000"
     :get-container="false"
+    :pagination="false"
     :visible="visible"
     :body-style="{ paddingBottom: '80px' }"
     :footer-style="{ textAlign: 'right' }"
@@ -38,7 +39,6 @@ import { onUnmounted, reactive, ref } from 'vue';
 import m3u8Downloader, { M3u8DownTask } from '../../../utils/m3u8_helper';
 import cloneDeep from 'lodash.clonedeep';
 import eventBus from '../../../utils/event_bus';
-import { getElementById } from '../../../utils/index';
 const visible = ref(false);
 const onClose = () => {
   visible.value = false;
