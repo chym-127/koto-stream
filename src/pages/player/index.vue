@@ -117,17 +117,14 @@ function seekVideo(second: number) {
 </script>
 
 <template>
-  <div class="full" data-tauri-drag-region>
-    <div class="mask" data-tauri-drag-region :style="{ opacity: currentOpacity }"></div>
-
+  <div class="full">
     <video
-      data-tauri-drag-region
       id="videoInstance"
       autoplay
       controls
       controlslist="nodownload nofullscreen noremoteplayback"
-      height="360"
-      width="200"
+      height="100%"
+      width="100%"
       preload="auto"
       data-setup="{}"
       class="video-box"
@@ -136,18 +133,10 @@ function seekVideo(second: number) {
 </template>
 
 <style scoped>
-.mask {
-  position: fixed;
-  background-color: #000;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-}
-
 .video-box {
   width: 100%;
   height: 100%;
+  object-fit: fill;
 }
 
 .btn {

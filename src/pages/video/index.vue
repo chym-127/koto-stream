@@ -1,5 +1,5 @@
 <template>
-  <div class="full">
+  <div class="full" style="position: relative">
     <div class="bg full" :style="{ backgroundImage: 'url(' + video.bg + ')' }"></div>
     <div class="mask full"></div>
     <button class="koto-btn" @click="showSetting">Setting</button>
@@ -44,7 +44,13 @@
       </div>
     </div>
 
-    <Setting v-model:visible="settingVisible" ref="setting" :info="video" @update="updateSetting"></Setting>
+    <Setting
+      v-model:visible="settingVisible"
+      :style="{ position: 'absolute' }"
+      ref="setting"
+      :info="video"
+      @update="updateSetting"
+    ></Setting>
   </div>
 </template>
 <script setup lang="ts">
@@ -52,7 +58,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { reactive, ref } from 'vue';
 import { invoke } from '@tauri-apps/api/tauri';
 import { message } from 'ant-design-vue';
-import { exists, BaseDirectory } from '@tauri-apps/api/fs';
 
 import Setting from './Setting.vue';
 

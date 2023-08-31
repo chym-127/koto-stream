@@ -1,7 +1,6 @@
 <template>
   <div class="full vod-list container">
-
-    <button @click="showModal" class="show-btn">Import</button>
+    <!-- <button @click="showModal" class="show-btn">Import</button> -->
     <a-modal v-model:visible="open" title="导入媒体数据" @ok="handleOk">
       <textarea v-model="content" id="" cols="30" rows="10" class="full"></textarea>
     </a-modal>
@@ -34,7 +33,7 @@ function handleListVideo() {
   }).then((resp: any) => {
     items.splice(0);
     resp.data.forEach((item: any) => {
-      item.episodes = JSON.parse(item.episodes)
+      item.episodes = JSON.parse(item.episodes);
     });
     Object.assign(items, resp.data);
   });
@@ -51,7 +50,6 @@ function jumpToDetails(row: any) {
   });
 }
 
-
 const open = ref<boolean>(false);
 const content = ref('');
 function showModal() {
@@ -59,25 +57,24 @@ function showModal() {
 }
 
 function handleOk() {
-  let data = null
+  let data = null;
   try {
     data = JSON.parse(content.value);
   } catch (error) {
-    message.error("JSON格式错误")
-    return
+    message.error('JSON格式错误');
+    return;
   }
-
 
   for (const key in data) {
     if (Object.prototype.hasOwnProperty.call(data, key)) {
       const item = data[key];
-      item["episodes"] = JSON.stringify(item["episodes"])
+      item['episodes'] = JSON.stringify(item['episodes']);
 
       invoke('handle_create_video', {
         t: item,
       }).then((resp: any) => {
-        message.success("导入成功")
-        handleListVideo()
+        message.success('导入成功');
+        handleListVideo();
       });
     }
   }
@@ -112,7 +109,7 @@ function handleOk() {
   flex-wrap: wrap;
 }
 
-.container>.vod-item {
+.container > .vod-item {
   width: 360px;
   //   height: 240px;
   padding: 20px 20px 0 20px;

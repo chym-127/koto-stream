@@ -1,52 +1,59 @@
 <template>
-  <div class="download-center">
-    <a-button style="position: absolute; bottom: 20px; left: 20px" @click="showModal">下载中心</a-button>
-
-    <a-drawer
-      title="设置"
-      :width="820"
-      :visible="visible"
-      :body-style="{ paddingBottom: '80px' }"
-      :footer-style="{ textAlign: 'right' }"
-      @close="onClose"
-    >
-      <div style="padding: 0">
-        <a-table :columns="columns" :data-source="cloneDeep(taskList)" bordered>
-          <template #bodyCell="{ column, text, record }">
-            <template v-if="column.dataIndex === 'name'">
-              <span>{{ text }}</span>
-            </template>
-            <template v-if="column.dataIndex === 'progress'">
-              <span v-if="text !== 'file..'">{{ text }}%</span>
-              <span v-else>100%</span>
-            </template>
-
-            <template v-if="column.dataIndex === 'totalDuration'">
-              <span>{{ text }}</span>
-            </template>
-
-            <template v-if="column.dataIndex === 'leftTime'">
-              <span>{{ text }}</span>
-            </template>
+  <a-drawer
+    title="设置"
+    :width="820"
+    :zIndex="2000"
+    :get-container="false"
+    :visible="visible"
+    :body-style="{ paddingBottom: '80px' }"
+    :footer-style="{ textAlign: 'right' }"
+    @close="onClose"
+  >
+    <div style="padding: 0">
+      <a-table :columns="columns" :data-source="cloneDeep(taskList)" bordered>
+        <template #bodyCell="{ column, text, record }">
+          <template v-if="column.dataIndex === 'name'">
+            <span>{{ text }}</span>
           </template>
-        </a-table>
-      </div>
-    </a-drawer>
-  </div>
+          <template v-if="column.dataIndex === 'progress'">
+            <span v-if="text !== 'file..'">{{ text }}%</span>
+            <span v-else>100%</span>
+          </template>
+
+          <template v-if="column.dataIndex === 'totalDuration'">
+            <span>{{ text }}</span>
+          </template>
+
+          <template v-if="column.dataIndex === 'leftTime'">
+            <span>{{ text }}</span>
+          </template>
+        </template>
+      </a-table>
+    </div>
+  </a-drawer>
 </template>
 
 <script setup lang="ts">
 import { onUnmounted, reactive, ref } from 'vue';
 import m3u8Downloader, { M3u8DownTask } from '../../../utils/m3u8_helper';
 import cloneDeep from 'lodash.clonedeep';
-
+import eventBus from '../../../utils/event_bus';
+import { getElementById } from '../../../utils/index';
 const visible = ref(false);
-const showModal = () => {
-  visible.value = true;
-};
 const onClose = () => {
   visible.value = false;
 };
+const toggleVisible = () => {
+  visible.value = !visible.value;
+};
+
+const menuClickCallback = function (data: any) {
+  if (data.id === 'DOWNLOAD_CENTER') {
+    toggleVisible();
+  }
+};
+
+eventBus.on('menu-click', menuClickCallback);
 
 const taskList = reactive<M3u8DownTask[]>([]);
 const columns = [
@@ -77,6 +84,7 @@ const columns = [
 ];
 
 onUnmounted(() => {
+  eventBus.off('menu-click', menuClickCallback);
   m3u8Downloader.destroy();
   clearInterval(p);
 });
@@ -88,8 +96,4 @@ let p = setInterval(() => {
 </script>
 
 <style lang="less" scoped>
-.download-center {
-  position: relative;
-  z-index: 99999;
-}
 </style>

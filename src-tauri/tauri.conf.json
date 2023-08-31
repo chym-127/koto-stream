@@ -69,7 +69,7 @@
         "fullscreen": false,
         "resizable": false,
         "transparent": false,
-        "decorations": true,
+        "decorations": false,
         "maximized": false,
         "title": "KOTO-STREAM",
         "width": 1080,

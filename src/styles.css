@@ -410,8 +410,6 @@ o.font-20-500 {
   padding-bottom: 16px;
 }
 
-
-
 div {
   -ms-overflow-style: none;
   /* Internet Explorer 10+ */
@@ -422,4 +420,12 @@ div {
 div::-webkit-scrollbar {
   display: none;
   /* Safari and Chrome */
+}
+
+.icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
 }

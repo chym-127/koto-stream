@@ -1,36 +1,36 @@
 <template>
-  <div class="full">
-    <a-layout class="full">
-      <a-layout-sider v-if="false">
-        <Menu></Menu>
-      </a-layout-sider>
-      <a-layout>
-        <!-- <a-layout-header></a-layout-header> -->
-        <a-layout-content class="bg-w">
-          <button class="back-btn" @click="back" v-if="route.path !== '/'">Back</button>
-          <router-view></router-view>
-        </a-layout-content>
-      </a-layout>
-    </a-layout>
-    <DownloadCenter></DownloadCenter>
+  <div class="full main-box" data-tauri-drag-region>
+    <div class="header" data-tauri-drag-region>
+      <MenuBar></MenuBar>
+    </div>
+    <div class="content" id="content">
+      <router-view></router-view>
+      <DownloadCenter :style="{ position: 'absolute' }"></DownloadCenter>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import Menu from './components/menu/index.vue';
-import DownloadCenter from './components/DownloadCenter.vue'
-import { useRouter, useRoute } from 'vue-router';
-
-const router = useRouter()
-const route = useRoute()
-
-
-function back() {
-  router.go(-1)
-}
+import MenuBar from './components/MenuBar.vue';
+import DownloadCenter from './components/DownloadCenter.vue';
 </script>
 
 <style lang="less" scoped>
+.main-box {
+  display: flex;
+  flex-direction: column;
+  .header {
+    width: 100%;
+    height: 32px;
+  }
+  .content {
+    height: 0;
+    position: relative;
+    width: 100%;
+    flex: 1;
+  }
+}
+
 .back-btn {
   z-index: 9;
   padding: 2px 6px;

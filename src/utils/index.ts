@@ -15,4 +15,17 @@ function holdResponse(resp: Resp) {
   }
 }
 
-export { holdResponse };
+
+function getElementById(id: string): HTMLElement {
+  console.log(id);
+  
+  let el = document.getElementById(id)
+  console.log(el);
+  
+  if (el) {
+    return el
+  }
+  return document.body
+}
+
+export { holdResponse, getElementById };

@@ -2,6 +2,7 @@
   <a-drawer
     title="设置"
     :width="720"
+    :get-container="false"
     :visible="props.visible"
     :body-style="{ paddingBottom: '80px' }"
     :footer-style="{ textAlign: 'right' }"
