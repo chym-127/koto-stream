@@ -65,10 +65,10 @@
     },
     "windows": [
       {
-        "alwaysOnTop": false,
+        "alwaysOnTop": true,
         "fullscreen": false,
         "resizable": false,
-        "transparent": false,
+        "transparent": true,
         "decorations": false,
         "maximized": false,
         "title": "KOTO-STREAM",

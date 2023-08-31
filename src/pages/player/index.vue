@@ -1,24 +1,44 @@
+<template>
+  <div class="full" style="position: relative;">
+    <div class="mask" v-if="playListModalVisible"
+      style="position: absolute;top: 0;left: 0;bottom: 0;right: 0;background: transparent;z-index: 2;"
+      @click="togglePlayListModal"></div>
+
+    <div class="episode-list" :class="playListModalVisible ? 'show' : 'hide'">
+      <div class="flex-row" style="flex-wrap: wrap;">
+        <div class="episode-item" :class="e.index === currentIndex ? 'active' : null"
+          v-for="e, index in currentVideo.episodes" @click="playVideo(e)">
+          <span class="c-fff">{{ e.title }}</span>
+        </div>
+      </div>
+    </div>
+    <video id="videoInstance" autoplay controls controlslist="nodownload nofullscreen noremoteplayback" height="100%"
+      width="100%" preload="auto" data-setup="{}" class="video-box"></video>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { open } from '@tauri-apps/api/dialog';
 import { appWindow } from '@tauri-apps/api/window';
 import { convertFileSrc, invoke } from '@tauri-apps/api/tauri';
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, reactive, ref } from 'vue';
 import { register, unregisterAll } from '@tauri-apps/api/globalShortcut';
 import { useRoute } from 'vue-router';
 import Hls from 'hls.js';
 import eventBus, { EventMsg } from '../../utils/event_bus';
 import m3u8Downloader, { M3u8DownTask } from '../../utils/m3u8_helper';
 import store from '../../utils/store';
+import { message } from 'ant-design-vue';
 
 let url = ref('');
 const route = useRoute();
-const currentVideo: VideoInfo = store.get('CURRENT_VIDEO');
+const currentVideo = reactive<VideoInfo>(store.get('CURRENT_VIDEO'));
 
 let currentEpisode: Episode | undefined;
-let index: number = Number(route.query.index);
+let currentIndex = ref<number>(Number(route.query.index));
 if (currentVideo) {
   currentEpisode = currentVideo.episodes?.find((item) => {
-    return item.index === index;
+    return item.index === currentIndex.value;
   });
 }
 let m3u8_url: string = currentEpisode!.url;
@@ -35,14 +55,28 @@ const setMenu = (menus: any) => {
   eventBus.publicize(msg);
 };
 const downloadToLocal = () => {
-  onDown(currentEpisode!);
+  if (!currentEpisode?.file_path) {
+    onDown(currentEpisode!);
+  } else {
+    message.warning("当前视频已下载到本地")
+  }
 };
+
+const playListModalVisible = ref(false)
+const togglePlayListModal = () => {
+  playListModalVisible.value = !playListModalVisible.value
+}
 let menus = [
-  !file_path && {
+  {
     id: 'DONWLOAD',
     name: '下载到本地',
     clickFunc: downloadToLocal,
   },
+  {
+    id: 'PLAY_LIST',
+    name: '播放列表',
+    clickFunc: togglePlayListModal,
+  }
 ];
 
 let workPath = '';
@@ -87,6 +121,18 @@ onMounted(() => {
   }
   videoInstance.setAttribute('crossorigin', 'anonymous');
 });
+
+const playVideo = (e: Episode) => {
+  currentEpisode = e
+  currentIndex.value = e.index
+  if (currentEpisode.file_path) {
+    url.value = convertFileSrc(currentEpisode.file_path);
+    videoInstance.src = url.value;
+  } else {
+    hls!.loadSource(currentEpisode.url);
+  }
+}
+
 
 async function openFile() {
   const selected: any = await open({
@@ -153,28 +199,52 @@ function seekVideo(second: number) {
   }
 }
 </script>
-
-<template>
-  <div class="full">
-    <video
-      id="videoInstance"
-      autoplay
-      controls
-      controlslist="nodownload nofullscreen noremoteplayback"
-      height="100%"
-      width="100%"
-      preload="auto"
-      data-setup="{}"
-      class="video-box"
-    ></video>
-  </div>
-</template>
-
 <style scoped>
 .video-box {
   width: 100%;
   height: 100%;
-  object-fit: fill;
+  object-fit: contain;
+  background-color: black;
+}
+
+.episode-list {
+  width: 400px;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  z-index: 3;
+  position: absolute;
+  justify-content: flex-start;
+  align-items: flex-start;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  transition: right 0.6s;
+  padding: 20px;
+
+  &.hide {
+    right: -400px
+  }
+
+  &.show {
+    right: 0;
+  }
+
+  .episode-item {
+    height: 30px;
+    cursor: pointer;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    width: 80px;
+    text-align: center;
+    padding: 4px 10px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+
+    &.active {
+      background-color: rgba(255, 255, 255, 0.6);
+    }
+  }
 }
 
 .btn {

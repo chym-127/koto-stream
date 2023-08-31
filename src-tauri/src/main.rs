@@ -28,7 +28,7 @@ fn main() {
 struct Resp<T> {
     data: Option<T>,
     message: String,
-    code: u8,
+    code: u32,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -84,11 +84,21 @@ fn handle_update_video(t: video::Video) -> Resp<Empty> {
 
 #[tauri::command]
 fn handle_del_video(id: usize) -> Resp<Empty> {
-    let _ = video::del_by_id(id);
+    let resp = video::del_by_id(id);
+    if let Ok(_) = resp {
+        let resp = fs::remove_dir_all(Path::new(&config::get_work_path()).join(id.to_string()));
+        if let Ok(_) = resp {
+            return Resp {
+                data: None,
+                message: "success".to_string(),
+                code: 200,
+            };
+        }
+    }
     Resp {
         data: None,
-        message: "success".to_string(),
-        code: 200,
+        message: "fail".to_string(),
+        code: 400,
     }
 }
 
@@ -133,7 +143,7 @@ pub struct DownFileReq {
     file_name: String,
 }
 
-use std::fs::File;
+use std::fs::{self, File};
 use std::io;
 use std::path::Path;
 

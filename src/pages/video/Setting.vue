@@ -1,14 +1,6 @@
 <template>
-  <a-drawer
-    title="设置"
-    :width="720"
-    :get-container="false"
-    :visible="props.visible"
-    style="height: 100%; overflow: hidden"
-    :body-style="{ paddingBottom: '40px' }"
-    :footer-style="{ textAlign: 'right' }"
-    @close="onClose"
-  >
+  <a-drawer title="设置" :width="720" :get-container="false" :visible="props.visible" style="height: 100%; overflow: hidden"
+    :body-style="{ paddingBottom: '40px' }" :footer-style="{ textAlign: 'right' }" @close="onClose">
     <div class="full flex-column" style="overflow: hidden">
       <a-tabs v-model:activeKey="activeKey">
         <a-tab-pane key="1" tab="基础信息"></a-tab-pane>
@@ -56,15 +48,22 @@
             <a-row :gutter="16">
               <a-col :span="12">
                 <a-form-item label="封面图">
-                  <a-input v-model:value="form.image" style="width: 100%" placeholder="请输入封面图" />
+                  <a-input-group compact>
+                    <a-input v-model:value="form.image" style="width: calc(100% - 100px)" placeholder="请输入封面图" />
+                    <a-button type="primary" style="width: 100px" :loading="imageLoading"
+                      @click="saveToLocal(form.image!, 'image.png', 'image')">
+                      下载
+                    </a-button>
+                  </a-input-group>
                 </a-form-item>
               </a-col>
               <a-col :span="12">
                 <a-form-item label="背景墙">
                   <a-input-group compact>
                     <a-input v-model:value="form.bg" style="width: calc(100% - 100px)" placeholder="请输入背景墙图片" />
-                    <a-button type="primary" style="width: 100px" @click="saveToLocal(form.bg!, 'image.webp')">
-                      下载到本地
+                    <a-button type="primary" style="width: 100px" :loading="bgLoading"
+                      @click="saveToLocal(form.bg!, 'bg.png', 'bg')">
+                      下载
                     </a-button>
                   </a-input-group>
                 </a-form-item>
@@ -82,18 +81,18 @@
         <div style="padding: 0 24px 24px 24px" v-show="activeKey === '2'">
           <a-table :columns="columns" :data-source="form.episodes" bordered>
             <template #bodyCell="{ column, text, record }: any">
-              <template v-if="column.dataIndex === 'title'">
-                <a-input v-model:value="record.title" placeholder="请输入名称" />
+              <template v-if=" column.dataIndex === 'title' ">
+                <a-input v-model:value=" record.title " placeholder="请输入名称" />
               </template>
-              <template v-if="column.dataIndex === 'url'">
-                <a-input v-model:value="record.url" placeholder="请输入url" />
+              <template v-if=" column.dataIndex === 'url' ">
+                <a-input v-model:value=" record.url " placeholder="请输入url" />
               </template>
 
-              <template v-if="column.dataIndex === 'file_path'">
+              <template v-if=" column.dataIndex === 'file_path' ">
                 <span>{{ text ? '已下载' : '未下载' }}</span>
               </template>
 
-              <template v-if="column.dataIndex === 'action'">
+              <template v-if=" column.dataIndex === 'action' ">
                 <a-button type="link" @click="onDown(record)">{{ record.file_path ? '重新下载' : '下载' }}</a-button>
               </template>
             </template>
@@ -102,8 +101,11 @@
       </div>
     </div>
     <a-space style="position: absolute; top: 8px; right: 24px">
-      <a-button @click="onClose">取消</a-button>
-      <a-button type="primary" @click="onSubmit">更新</a-button>
+      <a-button @click=" onClose ">取消</a-button>
+      <a-popconfirm title="你确认要删除这个资源吗?" ok-text="Yes" cancel-text="No" @confirm="handleDeleteVideo()">
+        <a-button type="primary" danger>删除</a-button>
+      </a-popconfirm>
+      <a-button type="primary" @click=" onSubmit ">更新</a-button>
     </a-space>
   </a-drawer>
 </template>
@@ -115,6 +117,7 @@ import { convertFileSrc } from '@tauri-apps/api/tauri';
 import type { Rule } from 'ant-design-vue/es/form';
 import m3u8Downloader, { M3u8DownTask } from '../../utils/m3u8_helper';
 import { BaseDirectory } from '@tauri-apps/api/fs';
+import router from '../../routers';
 
 const props = defineProps<{
   visible: boolean;
@@ -182,7 +185,27 @@ function handleUpdateVideo(data: VideoInfo) {
   });
 }
 
-function saveToLocal(url: string, file_name: string) {
+
+function handleDeleteVideo() {
+  invoke('handle_del_video', {
+    id: form.id,
+  }).then((resp: any) => {
+    router.push('/')
+  });
+}
+
+
+const imageLoading = ref(false)
+const bgLoading = ref(false)
+
+
+function saveToLocal(url: string, file_name: string, key: string) {
+  if (key === 'image') {
+    imageLoading.value = true
+  }
+  if (key === 'bg') {
+    bgLoading.value = true
+  }
   invoke('handle_down_file', {
     req: {
       url: url,
@@ -191,10 +214,22 @@ function saveToLocal(url: string, file_name: string) {
     },
   })
     .then((resp: any) => {
-      Object.assign(form, { bg: convertFileSrc(resp.data) });
+      if (key === 'image') {
+        Object.assign(form, { image: convertFileSrc(resp.data) });
+      }
+      if (key === 'bg') {
+        Object.assign(form, { bg: convertFileSrc(resp.data) });
+      }
     })
     .catch((e) => {
       console.log(e);
+    }).finally(() => {
+      if (key === 'image') {
+        imageLoading.value = false
+      }
+      if (key === 'bg') {
+        bgLoading.value = false
+      }
     });
 }
 
