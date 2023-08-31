@@ -1,5 +1,3 @@
-import { type } from "os";
-
 interface EventMsg {
     id: string,
     name: string,

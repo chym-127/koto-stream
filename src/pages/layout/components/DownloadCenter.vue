@@ -16,16 +16,16 @@
             <span>{{ text }}</span>
           </template>
           <template v-if="column.dataIndex === 'progress'">
-            <span v-if="text !== 'file..'">{{ text }}%</span>
+            <span v-if="text !== 'file..'">{{ text || 0 }}%</span>
             <span v-else>100%</span>
           </template>
 
           <template v-if="column.dataIndex === 'totalDuration'">
-            <span>{{ text }}</span>
+            <span>{{ text || '-' }}</span>
           </template>
 
           <template v-if="column.dataIndex === 'leftTime'">
-            <span>{{ text }}</span>
+            <span>{{ text || '-' }}</span>
           </template>
         </template>
       </a-table>
@@ -72,14 +72,14 @@ const columns = [
     dataIndex: 'totalDuration',
   },
   {
-    title: '状态',
-    width: 120,
-    dataIndex: 'state',
-  },
-  {
     title: '剩余下载时间',
     width: 120,
     dataIndex: 'leftTime',
+  },
+  {
+    title: '状态',
+    width: 120,
+    dataIndex: 'state',
   },
 ];
 
@@ -95,5 +95,4 @@ let p = setInterval(() => {
 }, 100);
 </script>
 
-<style lang="less" scoped>
-</style>
+<style lang="less" scoped></style>

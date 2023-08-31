@@ -4,13 +4,18 @@
     :width="720"
     :get-container="false"
     :visible="props.visible"
-    :body-style="{ paddingBottom: '80px' }"
+    style="height: 100%; overflow: hidden"
+    :body-style="{ paddingBottom: '40px' }"
     :footer-style="{ textAlign: 'right' }"
     @close="onClose"
   >
-    <a-tabs v-model:activeKey="activeKey">
-      <a-tab-pane key="1" tab="基础信息">
-        <div style="padding: 0 24px 24px 24px">
+    <div class="full flex-column" style="overflow: hidden">
+      <a-tabs v-model:activeKey="activeKey">
+        <a-tab-pane key="1" tab="基础信息"></a-tab-pane>
+        <a-tab-pane key="2" tab="剧集" force-render></a-tab-pane>
+      </a-tabs>
+      <div class="h-0 flex-1" style="overflow: auto;">
+        <div style="padding: 0 24px 24px 24px" v-show="activeKey === '1'">
           <a-form :model="form" :rules="rules" layout="vertical">
             <a-row :gutter="16">
               <a-col :span="12">
@@ -74,9 +79,7 @@
             </a-row>
           </a-form>
         </div>
-      </a-tab-pane>
-      <a-tab-pane key="2" tab="剧集" force-render>
-        <div style="padding: 0 24px 24px 24px">
+        <div style="padding: 0 24px 24px 24px" v-show="activeKey === '2'">
           <a-table :columns="columns" :data-source="form.episodes" bordered>
             <template #bodyCell="{ column, text, record }">
               <template v-if="column.dataIndex === 'title'">
@@ -96,26 +99,22 @@
             </template>
           </a-table>
         </div>
-      </a-tab-pane>
-    </a-tabs>
-
+      </div>
+    </div>
     <a-space style="position: absolute; top: 8px; right: 24px">
       <a-button @click="onClose">取消</a-button>
       <a-button type="primary" @click="onSubmit">更新</a-button>
-      <!-- <a-button type="primary" @click="onDown">测试下载</a-button> -->
     </a-space>
   </a-drawer>
 </template>
 <script lang="ts" setup>
 import { invoke } from '@tauri-apps/api/tauri';
-import { reactive, ref, toRaw } from 'vue';
+import { reactive, ref } from 'vue';
 import { Form } from 'ant-design-vue';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import type { Rule } from 'ant-design-vue/es/form';
 import m3u8Downloader, { M3u8DownTask } from '../../utils/m3u8_helper';
-import { exists, BaseDirectory } from '@tauri-apps/api/fs';
-
-const documentPath = BaseDirectory.Document;
+import { BaseDirectory } from '@tauri-apps/api/fs';
 
 const props = defineProps<{
   visible: boolean;
@@ -237,6 +236,4 @@ const columns = [
 ];
 </script>
 
-<style lang="css">
-
-</style>
+<style lang="css"></style>
