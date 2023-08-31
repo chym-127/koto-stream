@@ -26,18 +26,21 @@
             if (myUrl) {
                 if (myUrl.indexOf('.m3u8') !== -1 && myUrl.indexOf('hls') !== -1) {
                     let currentVod = document.querySelector("li[class='on']")
-                    let index = 0
-                    let title = ""
                     if (currentVod) {
-                        index = getChildIndex(currentVod)
-                        title = currentVod.innerText
-                        window.episodes[index] = {
-                            title: title,
-                            url: myUrl,
-                            index: index + 1
+                        window.currentVodUrl = myUrl
+                        let index = getChildIndex(currentVod)
+                        saveCurrentVod(currentVod.innerText, myUrl, index)
+                        if (window.autoCollect) {
+                            let nextNode = getChildByIndex(currentVod.parentNode, index + 1)
+                            if (nextNode) {
+                                startNext(nextNode)
+                            } else {
+                                window.autoCollect = false
+                                window.saveVod()
+                            }
                         }
                     }
-                    // localStorage.setItem("AAAAA", myUrl)
+
                 }
             }
         });
@@ -53,16 +56,48 @@ function getChildIndex(node) {
 
 
 
+// (function () {
+//     window.episodes = {}
+//     let el = document.createElement("button")
+//     el.innerText = "采集视频"
+//     el.style.position = "fixed"
+//     el.style.top = "20px"
+//     el.style.right = "20px"
+//     el.style.zIndex = 999999
+//     el.addEventListener("click", e => {
+//         window.saveVod()
+//     })
+//     if (document.body) {
+//         setTimeout(() => {
+//             document.body.appendChild(el)
+//         }, 3000);
+//     }
+// })();
+
+
 (function () {
     window.episodes = {}
     let el = document.createElement("button")
-    el.innerText = "采集视频"
+    el.innerText = "自动采集"
     el.style.position = "fixed"
-    el.style.top = "20px"
+    el.style.bottom = "20px"
     el.style.right = "20px"
     el.style.zIndex = 999999
     el.addEventListener("click", e => {
-        window.saveVod()
+        let currentVod = document.querySelector("li[class='on']")
+        if (currentVod) {
+            window.autoCollect = true
+            let index = getChildIndex(currentVod)
+            let nextNode = getChildByIndex(currentVod.parentNode, index + 1)
+            if (nextNode) {
+                startNext(nextNode)
+            } else {
+                window.saveVod()
+            }
+        } else {
+            alert("请先选择一个资源")
+        }
+
     })
     if (document.body) {
         setTimeout(() => {
@@ -70,6 +105,37 @@ function getChildIndex(node) {
         }, 3000);
     }
 })();
+
+function startNext(node) {
+    node.click()
+    let el = document.querySelector("dt[class='on']")
+    if (el) {
+        let arg1 = getChildIndex(el)
+        let arg2 = getChildIndex(node)
+        window.play(arg1, arg2)
+    }
+}
+
+function getChildByIndex(node, index) {
+    const list = node.children;
+
+    let children = null
+    for (let i = 0; i < list.length; i++) {
+        if (i === index) {
+            children = list[i]
+            break;
+        }
+    }
+    return children
+}
+
+window.saveCurrentVod = (title, url, index) => {
+    window.episodes[index] = {
+        title: title,
+        url: url,
+        index: index + 1
+    }
+}
 
 window.saveVod = function () {
     let MOVS = {}
@@ -106,7 +172,7 @@ function getVideoInfoFromClub(MOVS) {
         for (let index = 0; index < arrDom.length - 1; index++) {
             const element = arrDom[index];
             let value = element.getElementsByTagName("span")[0].innerText
-            obj[arrKeys[index]] = value
+            obj[arrKeys[index]] = valu
         }
 
         let result = Object.keys(window.episodes).map((key) => window.episodes[key]);

@@ -238,15 +238,5 @@ const columns = [
 </script>
 
 <style lang="css">
-.ant-drawer-header {
-  display: none;
-}
 
-.ant-drawer-body {
-  padding: 0;
-}
-
-.ant-tabs-nav {
-  padding: 0 12px;
-}
 </style>

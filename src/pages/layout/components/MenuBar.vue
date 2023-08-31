@@ -45,17 +45,27 @@ const menus = reactive<Menu[]>([
     id: 'DOWNLOAD_CENTER',
     name: '下载中心',
   },
+  {
+    id: 'IMPORT_VIDEO',
+    name: '导入视频',
+  },
+  {
+    id: 'REFRESH',
+    name: '刷新',
+  },
 ]);
 
 const menuClick = (menu: Menu) => {
-  let msg: EventMsg = {
-    id: 'menu-click',
-    name: '点击菜单事件',
-    data: menu,
-  };
   if (menu.id === 'BACK') {
     router.go(-1);
+  } else if (menu.id === 'REFRESH') {
+    window.location.reload();
   } else {
+    let msg: EventMsg = {
+      id: 'menu-click',
+      name: '点击菜单事件',
+      data: menu,
+    };
     eventBus.publicize(msg);
   }
 };

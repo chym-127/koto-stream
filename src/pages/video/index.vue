@@ -1,9 +1,10 @@
 <template>
   <div class="full" style="position: relative">
-    <div class="bg full" :style="{ backgroundImage: 'url(' + video.bg + ')' }"></div>
+    <div class="bg full" v-if="video.bg" :style="{ backgroundImage: 'url(' + video.bg + ')' }"></div>
+    <div class="bg full" v-else :style="{ backgroundImage: 'url(' + defaultBg + ')' }"></div>
     <div class="mask full"></div>
     <button class="koto-btn" @click="showSetting">Setting</button>
-    <div class="flex-row info-box" style="padding: 50px 40px 30px 40px">
+    <div class="flex-row info-box" style="padding: 20px 40px 30px 40px">
       <div class="left flex-1">
         <div class="title ellips-1">
           <span>{{ video.title }}</span>
@@ -36,7 +37,7 @@
         </div>
       </div>
     </div>
-    <div style="padding: 0 40px">
+    <div style="padding: 0 40px 20px 40px; overflow: auto; height: 150px">
       <div class="episodes flex-row">
         <div class="episode-item" v-for="item in video.episodes" @click="playVideo(item)">
           <span class="font-14-400 c-000">{{ item.title }}</span>
@@ -58,7 +59,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { reactive, ref } from 'vue';
 import { invoke } from '@tauri-apps/api/tauri';
 import { message } from 'ant-design-vue';
-
+import defaultBg from '../../assets/image/bg.jpg';
 import Setting from './Setting.vue';
 
 const settingVisible = ref<boolean>(false);
@@ -132,7 +133,7 @@ function playVideo(item: any) {
   position: relative;
   z-index: 4;
   .episode-item {
-    width: 100px;
+    width: 78px;
     height: 32px;
     cursor: pointer;
     border-radius: 16px;
@@ -223,7 +224,7 @@ function playVideo(item: any) {
   top: 0;
   left: 0;
   z-index: 1;
-  background-repeat: space;
+  background-repeat: repeat-x;
   background-position: center;
   background-size: auto 100%;
 }
@@ -234,7 +235,7 @@ function playVideo(item: any) {
 
 .koto-btn {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 0;
+  right: 0;
 }
 </style>
