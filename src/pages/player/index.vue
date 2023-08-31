@@ -13,7 +13,6 @@ import store from '../../utils/store';
 let url = ref('');
 const route = useRoute();
 const currentVideo: VideoInfo = store.get('CURRENT_VIDEO');
-console.log(currentVideo);
 
 let currentEpisode: Episode | undefined;
 let index: number = Number(route.query.index);
@@ -21,8 +20,6 @@ if (currentVideo) {
   currentEpisode = currentVideo.episodes?.find((item) => {
     return item.index === index;
   });
-  console.log(currentEpisode);
-  
 }
 let m3u8_url: string = currentEpisode!.url;
 let file_path: any = currentEpisode?.file_path;
@@ -41,7 +38,7 @@ const downloadToLocal = () => {
   onDown(currentEpisode!);
 };
 let menus = [
-  {
+  !file_path && {
     id: 'DONWLOAD',
     name: '下载到本地',
     clickFunc: downloadToLocal,
