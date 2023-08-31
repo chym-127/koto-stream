@@ -12,7 +12,7 @@
   >
     <div style="padding: 0">
       <a-table :columns="columns" :data-source="cloneDeep(taskList)" bordered>
-        <template #bodyCell="{ column, text, record }">
+        <template #bodyCell="{ column, text, record }: any">
           <template v-if="column.dataIndex === 'name'">
             <span>{{ text }}</span>
           </template>

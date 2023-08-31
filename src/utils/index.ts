@@ -33,7 +33,7 @@ const formatSeconds = (seconds: number, format: string = 'HHMMSS') => {
   let hasSecond = format.indexOf('SS') !== -1;
   let temp = '';
   let sec: number = seconds <= 0 ? 1 : Number(seconds.toFixed(0));
-  let h, m, s, unit = 0;
+  let h: number = 0, m: number = 0, s: number = 0, unit: number = 0;
 
   unit = 60 * 60;
   if (hasHour) {

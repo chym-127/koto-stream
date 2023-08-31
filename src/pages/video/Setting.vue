@@ -81,7 +81,7 @@
         </div>
         <div style="padding: 0 24px 24px 24px" v-show="activeKey === '2'">
           <a-table :columns="columns" :data-source="form.episodes" bordered>
-            <template #bodyCell="{ column, text, record }">
+            <template #bodyCell="{ column, text, record }: any">
               <template v-if="column.dataIndex === 'title'">
                 <a-input v-model:value="record.title" placeholder="请输入名称" />
               </template>
