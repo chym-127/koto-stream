@@ -1,25 +1,38 @@
 <template>
-  <div class="full" style="position: relative;">
-    <div class="mask" v-if="playListModalVisible"
-      style="position: absolute;top: 0;left: 0;bottom: 0;right: 0;background: transparent;z-index: 2;"
-      @click="togglePlayListModal"></div>
+  <div class="full" style="position: relative">
+    <div
+      class="mask"
+      v-if="playListModalVisible"
+      style="position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: transparent; z-index: 2"
+      @click="togglePlayListModal"
+    ></div>
 
     <div class="episode-list" :class="playListModalVisible ? 'show' : 'hide'">
-      <div class="flex-row" style="flex-wrap: wrap;">
-        <div class="episode-item" :class="e.index === currentIndex ? 'active' : null"
-          v-for="e, index in currentVideo.episodes" @click="playVideo(e)">
-          <span class="c-fff">{{ e.title }}</span>
+      <div class="flex-row" style="flex-wrap: wrap">
+        <div class="episode-item" v-for="(e, index) in currentVideo.episodes" @click="playVideo(e)">
+          <div class="card-box" :class="e.index === currentIndex ? 'active' : null">
+            <span class="c-fff">{{ e.title }}</span>
+          </div>
         </div>
       </div>
     </div>
-    <video id="videoInstance" autoplay controls controlslist="nodownload nofullscreen noremoteplayback" height="100%"
-      width="100%" preload="auto" data-setup="{}" class="video-box"></video>
+    <video
+      id="videoInstance"
+      autoplay
+      controls
+      controlslist="nodownload nofullscreen noremoteplayback"
+      height="100%"
+      width="100%"
+      preload="auto"
+      data-setup="{}"
+      class="video-box"
+    ></video>
   </div>
 </template>
 
 <script setup lang="ts">
 import { open } from '@tauri-apps/api/dialog';
-import { appWindow } from '@tauri-apps/api/window';
+import { LogicalSize, appWindow } from '@tauri-apps/api/window';
 import { convertFileSrc, invoke } from '@tauri-apps/api/tauri';
 import { onMounted, onUnmounted, reactive, ref } from 'vue';
 import { register, unregisterAll } from '@tauri-apps/api/globalShortcut';
@@ -54,18 +67,28 @@ const setMenu = (menus: any) => {
   };
   eventBus.publicize(msg);
 };
+
+const toggleMenuBar = (visible: boolean) => {
+  let msg: EventMsg = {
+    id: 'toggle-menu-bar',
+    name: '切换菜单的显示和隐藏',
+    data: visible,
+  };
+  eventBus.publicize(msg);
+};
+
 const downloadToLocal = () => {
   if (!currentEpisode?.file_path) {
     onDown(currentEpisode!);
   } else {
-    message.warning("当前视频已下载到本地")
+    message.warning('当前视频已下载到本地');
   }
 };
 
-const playListModalVisible = ref(false)
+const playListModalVisible = ref(false);
 const togglePlayListModal = () => {
-  playListModalVisible.value = !playListModalVisible.value
-}
+  playListModalVisible.value = !playListModalVisible.value;
+};
 let menus = [
   {
     id: 'DONWLOAD',
@@ -76,7 +99,7 @@ let menus = [
     id: 'PLAY_LIST',
     name: '播放列表',
     clickFunc: togglePlayListModal,
-  }
+  },
 ];
 
 let workPath = '';
@@ -97,6 +120,7 @@ const onDown = (e: Episode) => {
 
 onUnmounted(() => {
   setMenu([]);
+  toggleWindowSize()
 });
 
 onMounted(() => {
@@ -123,16 +147,15 @@ onMounted(() => {
 });
 
 const playVideo = (e: Episode) => {
-  currentEpisode = e
-  currentIndex.value = e.index
+  currentEpisode = e;
+  currentIndex.value = e.index;
   if (currentEpisode.file_path) {
     url.value = convertFileSrc(currentEpisode.file_path);
     videoInstance.src = url.value;
   } else {
     hls!.loadSource(currentEpisode.url);
   }
-}
-
+};
 
 async function openFile() {
   const selected: any = await open({
@@ -153,12 +176,12 @@ async function openFile() {
 
 let isMinimize = ref(false);
 unregisterAll();
-register('CommandOrControl+D', () => {
+register('CommandOrControl+D', async () => {
   if (!isMinimize.value) {
-    appWindow.minimize();
+    await appWindow.minimize();
     isMinimize.value = true;
   } else {
-    appWindow.unminimize();
+    await appWindow.unminimize();
     isMinimize.value = false;
   }
 });
@@ -178,6 +201,33 @@ register('CommandOrControl+W', () => {
 register('CommandOrControl+Shift+S', () => {
   openFile();
 });
+
+register('CommandOrControl+Shift+M', () => {
+  toggleWindowSize();
+});
+
+const toggleWindowSize = async () => {
+  const size = await appWindow.outerSize();
+  if (size.width === 1080) {
+    toggleMenuBar(false);
+    await appWindow.setAlwaysOnTop(true);
+    await appWindow.setSize(new LogicalSize(360, 214));
+  } else {
+    toggleMenuBar(true);
+    await appWindow.setAlwaysOnTop(false);
+    await appWindow.setSize(new LogicalSize(1080, 640));
+  }
+};
+
+const initWindow = async () => {
+  const size = await appWindow.outerSize();
+  if (size.width === 360) {
+    toggleMenuBar(false);
+    await appWindow.setAlwaysOnTop(true);
+  }
+};
+
+initWindow();
 
 const isVideoPlaying = (video: any) =>
   !!(video.currentTime > 0 && !video.paused && !video.ended && video.readyState > 2);
@@ -199,7 +249,7 @@ function seekVideo(second: number) {
   }
 }
 </script>
-<style scoped>
+<style lang="less" scoped>
 .video-box {
   width: 100%;
   height: 100%;
@@ -208,22 +258,25 @@ function seekVideo(second: number) {
 }
 
 .episode-list {
-  width: 400px;
+  width: 360px;
   height: 100%;
+  overflow: auto;
   display: flex;
   flex-wrap: wrap;
   z-index: 3;
   position: absolute;
   justify-content: flex-start;
   align-items: flex-start;
+  padding-right: 10px;
+  padding-bottom: 10px;
   top: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.9);
   transition: right 0.6s;
-  padding: 20px;
+  box-sizing: border-box;
 
   &.hide {
-    right: -400px
+    right: -360px;
   }
 
   &.show {
@@ -231,18 +284,19 @@ function seekVideo(second: number) {
   }
 
   .episode-item {
-    height: 30px;
+    height: 40px;
     cursor: pointer;
-    margin-right: 10px;
-    margin-bottom: 10px;
-    width: 80px;
-    text-align: center;
-    padding: 4px 10px;
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
-
-    &.active {
-      background-color: rgba(255, 255, 255, 0.6);
+    padding: 10px 0 0 10px;
+    width: 87.5px;
+    .card-box {
+      padding: 4px 0;
+      height: 100%;
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      &.active {
+        background-color: rgba(255, 255, 255, 0.6);
+      }
     }
   }
 }

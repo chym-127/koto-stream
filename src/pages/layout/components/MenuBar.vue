@@ -1,19 +1,21 @@
 <template>
   <div data-tauri-drag-region class="titlebar">
-    <div class="app-name flex-row items-center p-4" data-tauri-drag-region>
-      <span class="font-16-800">KOTO_STREAM</span>
+    <div v-if="menuVisible" class="app-name flex-row items-center p-4 mr-8" data-tauri-drag-region>
+      <span class="font-16-800" data-tauri-drag-region>KOTO_STREAM</span>
     </div>
-    <div class="menu flex-row flex-1 ml-8" style="justify-content: space-between" data-tauri-drag-region>
-      <div class="flex-row">
-        <div
-          class="menu-item flex-row items-center"
-          v-for="(item, index) in menus"
-          @click="menuClick(item)"
-          :key="index"
-        >
-          <span>{{ item.name }}</span>
+    <div class="menu flex-row flex-1" style="justify-content: space-between" data-tauri-drag-region>
+      <template v-if="menuVisible">
+        <div class="flex-row">
+          <div
+            class="menu-item flex-row items-center"
+            v-for="(item, index) in menus"
+            @click="menuClick(item)"
+            :key="index"
+          >
+            <span>{{ item.name }}</span>
+          </div>
         </div>
-      </div>
+      </template>
 
       <div class="flex-row">
         <div
@@ -42,12 +44,13 @@
 </template>
 
 <script setup lang="ts">
-import { appWindow } from '@tauri-apps/api/window';
+import { appWindow, LogicalSize } from '@tauri-apps/api/window';
 import eventBus, { EventMsg } from '../../../utils/event_bus';
-import { onUnmounted, reactive } from 'vue';
+import { onUnmounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+const menuVisible = ref(true);
 
 interface Menu {
   id: string;
@@ -99,11 +102,16 @@ const setCustomMenuCallback = function (data: Menu[]) {
   customMenus.splice(0);
   Object.assign(customMenus, data);
 };
+const toggleMenuBar = function (visible: boolean) {
+  menuVisible.value = visible;
+};
 
 eventBus.on('set-custom-menu', setCustomMenuCallback);
+eventBus.on('toggle-menu-bar', toggleMenuBar);
 
 onUnmounted(() => {
   eventBus.off('set-custom-menu', setCustomMenuCallback);
+  eventBus.off('toggle-menu-bar', toggleMenuBar);
 });
 
 const minimize = () => {
