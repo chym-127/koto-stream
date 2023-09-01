@@ -9,8 +9,8 @@
 
     <div class="episode-list" :class="playListModalVisible ? 'show' : 'hide'">
       <div class="flex-row" style="flex-wrap: wrap">
-        <div class="episode-item" v-for="(e, index) in currentVideo.episodes" @click="playVideo(e)">
-          <div class="card-box" :class="e.index === currentIndex ? 'active' : null">
+        <div class="episode-item" v-for="(e, index) in currentVideo.episodes" @click="playVideo(e, index)">
+          <div class="card-box" :class="index === currentIndex ? 'active' : null">
             <span class="c-fff">{{ e.title }}</span>
           </div>
         </div>
@@ -50,7 +50,6 @@
 </template>
 
 <script setup lang="ts">
-import { open } from '@tauri-apps/api/dialog';
 import { LogicalSize, appWindow } from '@tauri-apps/api/window';
 import { convertFileSrc, invoke } from '@tauri-apps/api/tauri';
 import { onMounted, onUnmounted, reactive, ref } from 'vue';
@@ -62,8 +61,11 @@ import m3u8Downloader, { M3u8DownTask } from '../../utils/m3u8_helper';
 import store from '../../utils/store';
 import { message } from 'ant-design-vue';
 import playHistory from '../video/history';
+import appConfig from '../../utils/config';
+import windowHelper, { WindowSize } from '../../utils/window_helper';
 
-let url = ref('');
+const url = ref('');
+const totalDuration = ref(0);
 
 const route = useRoute();
 const currentVideo = reactive<VideoInfo>(store.get('CURRENT_VIDEO'));
@@ -71,8 +73,8 @@ const currentVideo = reactive<VideoInfo>(store.get('CURRENT_VIDEO'));
 let currentEpisode: Episode | undefined;
 let currentIndex = ref<number>(Number(route.query.index));
 if (currentVideo) {
-  currentEpisode = currentVideo.episodes?.find((item) => {
-    return item.index === currentIndex.value;
+  currentEpisode = currentVideo.episodes?.find((item, index) => {
+    return index === currentIndex.value;
   });
 }
 let videoInstance: any = null;
@@ -140,6 +142,7 @@ const onDown = (e: Episode) => {
 onUnmounted(() => {
   setMenu([]);
   restoreWindow();
+  videoInstance = null;
 });
 
 onMounted(() => {
@@ -150,9 +153,24 @@ onMounted(() => {
       if (videoInstance.currentTime - progressState > 2) {
         addHistory(videoInstance.currentTime);
       }
+      if (appConfig.autoPlay && totalDuration) {
+        let t = appConfig.autoPlayOffset;
+        if (appConfig.autoPlayOffset < 1) {
+          t = totalDuration.value * appConfig.autoPlayOffset;
+        }
+        let diff = totalDuration.value - videoInstance.currentTime;
+        console.log(diff, t);
+
+        if (diff <= t) {
+          playNextVideo();
+        }
+      }
     },
     false
   );
+  videoInstance.addEventListener('loadedmetadata', () => {
+    totalDuration.value = videoInstance.duration;
+  });
   if (Hls.isSupported()) {
     hls = new Hls();
     hls.on(Hls.Events.MEDIA_ATTACHED, function () {
@@ -164,15 +182,15 @@ onMounted(() => {
     });
     // bind them together
     hls.attachMedia(videoInstance);
-    playVideo(currentEpisode!);
+    playVideo(currentEpisode!, currentIndex.value);
   }
   videoInstance.setAttribute('crossorigin', 'anonymous');
 });
 
-const playVideo = (e: Episode) => {
+const playVideo = (e: Episode, index: number) => {
   progressState = 0;
   currentEpisode = e;
-  currentIndex.value = e.index;
+  currentIndex.value = index;
   if (currentEpisode.file_path) {
     url.value = convertFileSrc(currentEpisode.file_path);
     videoInstance.src = url.value;
@@ -182,23 +200,17 @@ const playVideo = (e: Episode) => {
   checkHasHistory();
 };
 
-async function openFile() {
-  const selected: any = await open({
-    multiple: false,
-    filters: [
-      {
-        name: 'Videos',
-        extensions: ['mp4'],
-      },
-    ],
-  });
-  if (selected !== null) {
-    url.value = convertFileSrc(selected);
-    videoInstance.src = url.value;
-    // hls.loadSource(url.value);
+const playNextVideo = () => {
+  let newIndex = currentIndex.value + 1;
+  if (newIndex >= currentVideo.episodes!.length) {
+    return;
   }
-}
+  totalDuration.value = 999999999;
+  let e = currentVideo.episodes![currentIndex.value + 1];
+  playVideo(e, newIndex);
+};
 
+// 全局快捷键
 let isMinimize = ref(false);
 unregisterAll();
 register('CommandOrControl+D', async () => {
@@ -223,41 +235,39 @@ register('CommandOrControl+W', () => {
   playOrPause();
 });
 
-register('CommandOrControl+Shift+S', () => {
-  openFile();
-});
-
 register('CommandOrControl+Shift+M', () => {
   toggleWindowSize();
 });
 
+//窗口逻辑
+//切换窗口大小
 const toggleWindowSize = async () => {
-  const size = await appWindow.outerSize();
-  if (size.width === 1080) {
-    toggleMenuBar(false);
-    await appWindow.setAlwaysOnTop(true);
-    await appWindow.setSize(new LogicalSize(360, 214));
-  } else {
+  if (windowHelper.currentWindowSize === WindowSize.MINI) {
     toggleMenuBar(true);
-    await appWindow.setAlwaysOnTop(false);
-    await appWindow.setSize(new LogicalSize(1080, 640));
+    await windowHelper.alwaysOnTop(false);
+    await windowHelper.normalScreen();
+  }
+  if (windowHelper.currentWindowSize === WindowSize.NORMAL) {
+    toggleMenuBar(false);
+    await windowHelper.alwaysOnTop(true);
+    await windowHelper.miniScreen();
   }
 };
 
+//检查窗口size
 const initWindow = async () => {
-  const size = await appWindow.outerSize();
-  if (size.width === 360) {
+  if (windowHelper.currentWindowSize === WindowSize.MINI) {
     toggleMenuBar(false);
-    await appWindow.setAlwaysOnTop(true);
+    await windowHelper.alwaysOnTop(true);
   }
 };
 
+//恢复窗口状态
 const restoreWindow = async () => {
-  const size = await appWindow.outerSize();
-  if (size.width === 360) {
+  if (windowHelper.currentWindowSize === WindowSize.MINI) {
     toggleMenuBar(true);
-    await appWindow.setAlwaysOnTop(false);
-    await appWindow.setSize(new LogicalSize(1080, 640));
+    await windowHelper.alwaysOnTop(true);
+    await windowHelper.normalScreen();
   }
 };
 
@@ -287,6 +297,7 @@ function seekVideo(second: number, flag: boolean = false) {
   }
 }
 
+//播放记录相关逻辑
 const historyTipsVisible = ref(false);
 const progressStr = ref('');
 const progress = ref(0);

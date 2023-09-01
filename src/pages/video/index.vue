@@ -37,7 +37,7 @@
     </div>
     <div style="padding: 0 40px 20px 40px; overflow: auto; height: 150px">
       <div class="episodes flex-row">
-        <div class="episode-item" v-for="item in video.episodes" @click="playVideo(item)">
+        <div class="episode-item" v-for="(item, index) in video.episodes" @click="playVideo(item, index)">
           <span class="font-14-400 c-000">{{ item.title }}</span>
         </div>
       </div>
@@ -102,12 +102,12 @@ function updateSetting() {
   handleGetVideo();
 }
 
-function playVideo(item: any) {
+function playVideo(item: any,index:number) {
   store.set('CURRENT_VIDEO', video, true);
   router.push({
     path: '/video/player',
     query: {
-      index: item.index,
+      index: index,
     },
   });
 }
