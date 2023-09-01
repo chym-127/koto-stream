@@ -5,7 +5,7 @@ import { message } from 'ant-design-vue';
 message.config({
   top: `2px`,
   duration: 2,
-  maxCount: 1,
+  maxCount: 3,
 });
 </script>
 

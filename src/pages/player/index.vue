@@ -16,9 +16,13 @@
         </div>
       </div>
     </div>
+    <div class="video-name">
+      <span>{{currentVideo.title}}-{{currentEpisode?.title}}</span>
+    </div>
     <video
       id="videoInstance"
       autoplay
+      @click.prevent="playOrPause()"
       controls
       controlslist="nodownload nofullscreen noremoteplayback"
       height="100%"
@@ -150,19 +154,19 @@ onMounted(() => {
   videoInstance.addEventListener(
     'timeupdate',
     function () {
-      if (videoInstance.currentTime - progressState > 2) {
-        addHistory(videoInstance.currentTime);
-      }
-      if (appConfig.autoPlay && totalDuration) {
-        let t = appConfig.autoPlayOffset;
-        if (appConfig.autoPlayOffset < 1) {
-          t = totalDuration.value * appConfig.autoPlayOffset;
+      if (videoInstance.currentTime) {
+        if (videoInstance.currentTime - progressState > 2) {
+          addHistory(videoInstance.currentTime);
         }
-        let diff = totalDuration.value - videoInstance.currentTime;
-        console.log(diff, t);
-
-        if (diff <= t) {
-          playNextVideo();
+        if (appConfig.autoPlay && totalDuration) {
+          let t = appConfig.autoPlayOffset;
+          if (appConfig.autoPlayOffset < 1) {
+            t = totalDuration.value * appConfig.autoPlayOffset;
+          }
+          let diff = totalDuration.value - videoInstance.currentTime;
+          if (diff <= t) {
+            playNextVideo();
+          }
         }
       }
     },
@@ -198,6 +202,10 @@ const playVideo = (e: Episode, index: number) => {
     hls!.loadSource(currentEpisode.url);
   }
   checkHasHistory();
+
+  if (windowHelper.currentWindowSize === WindowSize.MINI && playListModalVisible) {
+    playListModalVisible.value = false;
+  }
 };
 
 const playNextVideo = () => {
@@ -246,8 +254,7 @@ const toggleWindowSize = async () => {
     toggleMenuBar(true);
     await windowHelper.alwaysOnTop(false);
     await windowHelper.normalScreen();
-  }
-  if (windowHelper.currentWindowSize === WindowSize.NORMAL) {
+  } else if (windowHelper.currentWindowSize === WindowSize.NORMAL) {
     toggleMenuBar(false);
     await windowHelper.alwaysOnTop(true);
     await windowHelper.miniScreen();
@@ -256,6 +263,9 @@ const toggleWindowSize = async () => {
 
 //检查窗口size
 const initWindow = async () => {
+  if (appConfig.playPageAutoMini) {
+    await windowHelper.miniScreen();
+  }
   if (windowHelper.currentWindowSize === WindowSize.MINI) {
     toggleMenuBar(false);
     await windowHelper.alwaysOnTop(true);
@@ -388,5 +398,14 @@ const clickHistoryTips = (second: number) => {
   left: 10px;
   font-size: 12px;
   color: #a0a0a0;
+}
+
+.video-name{
+  position: absolute;
+  top: 0px;
+  right: 4px;
+  opacity: 0.3s;
+  font-size: 6px;
+  color: #ffffff33;
 }
 </style>

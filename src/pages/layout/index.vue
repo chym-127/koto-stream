@@ -7,6 +7,7 @@
       <router-view></router-view>
       <DownloadCenter :style="{ position: 'absolute' }"></DownloadCenter>
       <ImportVideo :style="{ position: 'absolute' }"></ImportVideo>
+      <TipsConfirm :style="{ position: 'absolute' }"></TipsConfirm>
     </div>
   </div>
 </template>
@@ -15,6 +16,7 @@
 import MenuBar from './components/MenuBar.vue';
 import DownloadCenter from './components/DownloadCenter.vue';
 import ImportVideo from './components/ImportVideo.vue';
+import TipsConfirm from './components/TipsConfirm.vue';
 </script>
 
 <style lang="less" scoped>
