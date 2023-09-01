@@ -1,11 +1,19 @@
 import cloneDeep from 'lodash.clonedeep';
 
+const keySet = new Set()
 
 class Store {
     _obj: any;
+    _storeName: string;
     _localObj: any;
-    constructor() {
-        let local = localStorage.getItem("STORE")
+    constructor(storeName: string) {
+        this._storeName = storeName.toUpperCase()
+        if (keySet.has(this._storeName)) {
+            throw new Error("不能声明重复的key：" + this._storeName);
+        } else {
+            keySet.add(this._storeName)
+        }
+        let local = localStorage.getItem(this._storeName)
         if (local) {
             this._obj = JSON.parse(local)
             this._localObj = cloneDeep(this._obj)
@@ -20,7 +28,7 @@ class Store {
         this._obj[key] = data
         if (isLocal) {
             this._localObj[key] = cloneDeep(this._obj[key])
-            localStorage.setItem("STORE", JSON.stringify(this._localObj))
+            localStorage.setItem(this._storeName, JSON.stringify(this._localObj))
         }
     }
 
@@ -28,10 +36,16 @@ class Store {
     get(key: string): any {
         return this._obj[key]
     }
+
+
+    getAll(): any {
+        return this._obj
+    }
 }
 
 
-const store = new Store()
+const store = new Store("STORE")
 
 
+export { Store }
 export default store

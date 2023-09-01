@@ -27,6 +27,25 @@
       data-setup="{}"
       class="video-box"
     ></video>
+    <div class="history-tips flex-row" v-if="historyTipsVisible">
+      <span>
+        上次播放至
+        <span style="color: aliceblue">{{ progressStr }}</span>
+        ,是否继续播放
+      </span>
+      <div
+        style="color: aliceblue; background-color: aliceblue; cursor: pointer; margin: 0 4px"
+        @click="clickHistoryTips(progress)"
+      >
+        <span style="color: black; padding: 2px">是</span>
+      </div>
+      <div
+        style="color: aliceblue; background-color: aliceblue; cursor: pointer; margin: 0 4px"
+        @click="historyTipsVisible = false"
+      >
+        <span style="color: black; padding: 2px">否</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -42,8 +61,10 @@ import eventBus, { EventMsg } from '../../utils/event_bus';
 import m3u8Downloader, { M3u8DownTask } from '../../utils/m3u8_helper';
 import store from '../../utils/store';
 import { message } from 'ant-design-vue';
+import playHistory from '../video/history';
 
 let url = ref('');
+
 const route = useRoute();
 const currentVideo = reactive<VideoInfo>(store.get('CURRENT_VIDEO'));
 
@@ -54,8 +75,6 @@ if (currentVideo) {
     return item.index === currentIndex.value;
   });
 }
-let m3u8_url: string = currentEpisode!.url;
-let file_path: any = currentEpisode?.file_path;
 let videoInstance: any = null;
 let hls: Hls | null = null;
 
@@ -120,11 +139,20 @@ const onDown = (e: Episode) => {
 
 onUnmounted(() => {
   setMenu([]);
-  toggleWindowSize()
+  restoreWindow();
 });
 
 onMounted(() => {
   videoInstance = document.getElementById('videoInstance');
+  videoInstance.addEventListener(
+    'timeupdate',
+    function () {
+      if (videoInstance.currentTime - progressState > 2) {
+        addHistory(videoInstance.currentTime);
+      }
+    },
+    false
+  );
   if (Hls.isSupported()) {
     hls = new Hls();
     hls.on(Hls.Events.MEDIA_ATTACHED, function () {
@@ -136,17 +164,13 @@ onMounted(() => {
     });
     // bind them together
     hls.attachMedia(videoInstance);
-    if (file_path) {
-      url.value = convertFileSrc(file_path);
-      videoInstance.src = url.value;
-    } else {
-      hls.loadSource(m3u8_url);
-    }
+    playVideo(currentEpisode!);
   }
   videoInstance.setAttribute('crossorigin', 'anonymous');
 });
 
 const playVideo = (e: Episode) => {
+  progressState = 0;
   currentEpisode = e;
   currentIndex.value = e.index;
   if (currentEpisode.file_path) {
@@ -155,6 +179,7 @@ const playVideo = (e: Episode) => {
   } else {
     hls!.loadSource(currentEpisode.url);
   }
+  checkHasHistory();
 };
 
 async function openFile() {
@@ -227,6 +252,15 @@ const initWindow = async () => {
   }
 };
 
+const restoreWindow = async () => {
+  const size = await appWindow.outerSize();
+  if (size.width === 360) {
+    toggleMenuBar(true);
+    await appWindow.setAlwaysOnTop(false);
+    await appWindow.setSize(new LogicalSize(1080, 640));
+  }
+};
+
 initWindow();
 
 const isVideoPlaying = (video: any) =>
@@ -243,11 +277,39 @@ function playOrPause() {
   }
 }
 
-function seekVideo(second: number) {
+function seekVideo(second: number, flag: boolean = false) {
   if (videoInstance) {
-    videoInstance.currentTime += second;
+    if (flag) {
+      videoInstance.currentTime = second;
+    } else {
+      videoInstance.currentTime += second;
+    }
   }
 }
+
+const historyTipsVisible = ref(false);
+const progressStr = ref('');
+const progress = ref(0);
+
+let progressState = 0;
+function addHistory(progress: number) {
+  playHistory.set(currentVideo.id, currentEpisode!.index, progress);
+  progressState = progress;
+}
+
+function checkHasHistory() {
+  let data = playHistory.get(currentVideo.id, currentEpisode!.index);
+  if (data && data.progress) {
+    progress.value = data.progress;
+    progressStr.value = new Date(data.progress * 1000).toISOString().slice(11, 19);
+    historyTipsVisible.value = true;
+  }
+}
+
+const clickHistoryTips = (second: number) => {
+  seekVideo(second, true);
+  historyTipsVisible.value = false;
+};
 </script>
 <style lang="less" scoped>
 .video-box {
@@ -306,5 +368,14 @@ function seekVideo(second: number) {
   bottom: 10px;
   right: 10px;
   z-index: 1;
+}
+
+.history-tips {
+  position: absolute;
+  z-index: 1;
+  top: 10px;
+  left: 10px;
+  font-size: 12px;
+  color: #a0a0a0;
 }
 </style>
