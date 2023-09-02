@@ -1,11 +1,8 @@
 <template>
   <div class="full" style="position: relative">
-    <div
-      class="mask"
-      v-if="playListModalVisible"
+    <div class="mask" v-if="playListModalVisible"
       style="position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: transparent; z-index: 2"
-      @click="togglePlayListModal"
-    ></div>
+      @click="togglePlayListModal"></div>
 
     <div class="episode-list" :class="playListModalVisible ? 'show' : 'hide'">
       <div class="flex-row" style="flex-wrap: wrap">
@@ -17,39 +14,11 @@
       </div>
     </div>
     <div class="video-name">
-      <span>{{currentVideo.title}}-{{currentEpisode?.title}}</span>
+      <span>{{ currentVideo.title }}-{{ currentEpisode?.title }}</span>
     </div>
-    <video
-      id="videoInstance"
-      autoplay
-      @click.prevent="playOrPause()"
-      controls
-      controlslist="nodownload nofullscreen noremoteplayback"
-      height="100%"
-      width="100%"
-      preload="auto"
-      data-setup="{}"
-      class="video-box"
-    ></video>
-    <div class="history-tips flex-row" v-if="historyTipsVisible">
-      <span>
-        上次播放至
-        <span style="color: aliceblue">{{ progressStr }}</span>
-        ,是否继续播放
-      </span>
-      <div
-        style="color: aliceblue; background-color: aliceblue; cursor: pointer; margin: 0 4px"
-        @click="clickHistoryTips(progress)"
-      >
-        <span style="color: black; padding: 2px">是</span>
-      </div>
-      <div
-        style="color: aliceblue; background-color: aliceblue; cursor: pointer; margin: 0 4px"
-        @click="historyTipsVisible = false"
-      >
-        <span style="color: black; padding: 2px">否</span>
-      </div>
-    </div>
+    <video id="videoInstance" autoplay @click.prevent="playOrPause()" controls
+      controlslist="nodownload nofullscreen noremoteplayback" height="100%" width="100%" preload="auto" data-setup="{}"
+      class="video-box"></video>
   </div>
 </template>
 
@@ -92,6 +61,15 @@ const setMenu = (menus: any) => {
   };
   eventBus.publicize(msg);
 };
+
+const pushTipsConfirm = (data: Tips) => {
+  let msg: EventMsg = {
+    id: 'new-tips-confirm',
+    name: '设置Tips',
+    data: data,
+  };
+  eventBus.publicize(msg);
+}
 
 const toggleMenuBar = (visible: boolean) => {
   let msg: EventMsg = {
@@ -146,7 +124,14 @@ const onDown = (e: Episode) => {
 onUnmounted(() => {
   setMenu([]);
   restoreWindow();
-  videoInstance = null;
+  let msg: EventMsg = {
+    id: 'new-tips-confirm',
+    name: '设置Tips',
+    data: null,
+  };
+  eventBus.publicize(msg);
+  videoInstance.replaceWith(videoInstance.cloneNode(true));
+  eventBus.off('tips-confirm-event', tipClick)
 });
 
 onMounted(() => {
@@ -308,7 +293,6 @@ function seekVideo(second: number, flag: boolean = false) {
 }
 
 //播放记录相关逻辑
-const historyTipsVisible = ref(false);
 const progressStr = ref('');
 const progress = ref(0);
 
@@ -323,13 +307,23 @@ function checkHasHistory() {
   if (data && data.progress) {
     progress.value = data.progress;
     progressStr.value = new Date(data.progress * 1000).toISOString().slice(11, 19);
-    historyTipsVisible.value = true;
+    let tip: Tips = {
+      context: `上次播放至 ${progressStr.value},是否继续播放`,
+      tipName: 'seek-video',
+      leftTime: 10,
+    }
+    pushTipsConfirm(tip)
   }
 }
+const tipClick = (data: any) => {
+  if (data.tipName === 'seek-video' && data.event === 'ok') {
+    clickHistoryTips(progress.value)
+  }
+}
+eventBus.on('tips-confirm-event', tipClick)
 
 const clickHistoryTips = (second: number) => {
   seekVideo(second, true);
-  historyTipsVisible.value = false;
 };
 </script>
 <style lang="less" scoped>
@@ -371,12 +365,14 @@ const clickHistoryTips = (second: number) => {
     cursor: pointer;
     padding: 10px 0 0 10px;
     width: 87.5px;
+
     .card-box {
       padding: 4px 0;
       height: 100%;
       text-align: center;
       background-color: rgba(255, 255, 255, 0.3);
       border-radius: 8px;
+
       &.active {
         background-color: rgba(255, 255, 255, 0.6);
       }
@@ -400,7 +396,7 @@ const clickHistoryTips = (second: number) => {
   color: #a0a0a0;
 }
 
-.video-name{
+.video-name {
   position: absolute;
   top: 0px;
   right: 4px;

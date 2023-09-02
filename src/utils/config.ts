@@ -7,7 +7,7 @@ class Config {
     autoPlayTip: boolean = true;//自动播放前的提示
     autoPlayOffset: number = 10;//剩余多少提示自动播放 秒或者百分比 小数即为百分比
 
-    playPageAutoMini: boolean = true;
+    playPageAutoMini: boolean = false;
 
     normalWindowSize: number[] = [1080, 640];
     miniWindowSize: number[] = [360, 214];

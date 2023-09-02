@@ -1,12 +1,13 @@
 <template>
   <div class="tip-confirm">
-    <div class="content-box">
-      <div class="left flex-row">上次播放至 ,是否继续播放</div>
+    <div class="content-box" v-if="visible">
+      <div class="left flex-row">{{ context }}</div>
       <div class="right flex-row">
-        <div class="action-btn">
+        <div class="action-btn" @click="tipsEnd('ok')">
           <span>{{ okTxt }}</span>
+          <span>({{ countDown }}s)</span>
         </div>
-        <div class="action-btn">
+        <div class="action-btn" @click="tipsEnd('cancel')">
           <span>{{ cancelTxt }}</span>
         </div>
       </div>
@@ -17,30 +18,64 @@
 import { onUnmounted, ref } from 'vue';
 import eventBus, { EventMsg } from '../../../utils/event_bus';
 
+
 const okTxt = ref('是');
 const cancelTxt = ref('否');
 const context = ref('');
 const leftTime = ref(3);
 const tipName = ref('');
+const visible = ref(false)
+const countDown = ref(0)
 
-const newTipConfirm = (data: any) => {
-  context.value = data.context;
-  okTxt.value = data.okTxt || '是';
-  cancelTxt.value = data.cancelTxt || '否';
-  leftTime.value = data.leftTime || 3;
-  tipName.value = data.tipName || '';
+let scheduledId: any = null
+let timerId: any = null
+
+const newTipConfirm = (data: Tips | null) => {
+  if (!data) {
+    visible.value = false
+    clearTimer()
+    return
+  }
+  visible.value = true
+  context.value = data!.context;
+  okTxt.value = data!.okTxt || '是';
+  cancelTxt.value = data!.cancelTxt || '否';
+  leftTime.value = data!.leftTime || 3;
+  countDown.value = leftTime.value
+  tipName.value = data!.tipName || '';
+  if (scheduledId) {
+    clearTimeout(scheduledId)
+    timerId && clearInterval(timerId)
+  }
+  scheduledId = setTimeout(() => {
+    tipsEnd('ok')
+  }, leftTime.value * 1000);
+  timerId = setInterval(() => {
+    countDown.value -= 1
+  }, 1000)
+
 };
 
-const tipsEnd = (event:string) => {
+const clearTimer = () => {
+  if (scheduledId) {
+    clearTimeout(scheduledId)
+    timerId && clearInterval(timerId)
+  }
+}
+
+
+const tipsEnd = (event: string) => {
+  visible.value = false
   let msg: EventMsg = {
     id: 'tips-confirm-event',
     name: 'tips事件',
     data: {
-        tipName: tipName.value,
-        event: event
+      tipName: tipName.value,
+      event: event
     },
   };
   eventBus.publicize(msg);
+  clearTimer()
 };
 
 eventBus.on('new-tips-confirm', newTipConfirm);
@@ -78,9 +113,11 @@ onUnmounted(() => {
         background-color: rgba(255, 255, 255, 0.8);
         cursor: pointer;
         margin: 0 4px;
+        padding: 0 4px;
         color: #666;
         font-size: 8px;
         line-height: 22px;
+
         &:hover {
           background-color: rgba(255, 255, 255, 1);
           color: #000;
