@@ -42,6 +42,11 @@ class WindowHelper {
         }
     }
 
+
+    async maxScreen(){
+        await appWindow.maximize()
+    }
+
     // Pin
     async alwaysOnTop(flag: boolean = false) {
         await appWindow.setAlwaysOnTop(flag);

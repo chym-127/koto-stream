@@ -219,6 +219,11 @@ register('CommandOrControl+Shift+M', () => {
   toggleWindowSize();
 });
 
+
+register('CommandOrControl+Shift+F', () => {
+  windowHelper.maxScreen()
+});
+
 //窗口逻辑
 //切换窗口大小
 const toggleWindowSize = async () => {
