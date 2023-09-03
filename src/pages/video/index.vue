@@ -57,7 +57,7 @@ import Setting from './Setting.vue';
 import store from '../../utils/store';
 import eventBus, { EventMsg } from '../../utils/event_bus';
 import TipsConfirm from '../../utils/tips_confirm';
-import playHistory from './history';
+import playHistory, { RecentEpisodRecord } from './history';
 
 const settingVisible = ref<boolean>(false);
 const route = useRoute();
@@ -74,7 +74,7 @@ const showSetting = () => {
 };
 
 const id = route.query.id || null;
-let lastRecent = null
+let lastRecent: RecentEpisodRecord | null = null
 
 
 if (id) {
