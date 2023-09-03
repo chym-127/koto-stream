@@ -117,7 +117,7 @@ const onDown = (e: Episode) => {
 onUnmounted(() => {
   setMenu([]);
   restoreWindow();
-  // videoInstance.replaceWith(videoInstance.cloneNode(true));
+  historyTips.destroy()
   videoInstance = null
 });
 

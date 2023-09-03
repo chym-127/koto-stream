@@ -136,7 +136,7 @@ let menus = [
 
 const historyTips = new TipsConfirm(document.getElementById('content') as Element, {
   okCallback: () => {
-    playVideo(lastRecent!.index-1)
+    playVideo(lastRecent!.index - 1)
   },
   cancelCallback: () => { },
 })
@@ -146,6 +146,7 @@ const historyTips = new TipsConfirm(document.getElementById('content') as Elemen
 setMenu(menus);
 onUnmounted(() => {
   setMenu([]);
+  historyTips.destroy()
 });
 </script>
 
