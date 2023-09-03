@@ -37,19 +37,14 @@
     </div>
     <div style="padding: 0 40px 20px 40px; overflow: auto; height: 150px">
       <div class="episodes flex-row">
-        <div class="episode-item" v-for="(item, index) in video.episodes" @click="playVideo(item, index)">
+        <div class="episode-item" v-for="(item, index) in video.episodes" @click="playVideo(index)">
           <span class="font-14-400 c-000">{{ item.title }}</span>
         </div>
       </div>
     </div>
 
-    <Setting
-      v-model:visible="settingVisible"
-      :style="{ position: 'absolute' }"
-      ref="setting"
-      :info="video"
-      @update="updateSetting"
-    ></Setting>
+    <Setting v-model:visible="settingVisible" :style="{ position: 'absolute' }" ref="setting" :info="video"
+      @update="updateSetting"></Setting>
   </div>
 </template>
 <script setup lang="ts">
@@ -61,6 +56,8 @@ import defaultBg from '../../assets/image/bg.webp';
 import Setting from './Setting.vue';
 import store from '../../utils/store';
 import eventBus, { EventMsg } from '../../utils/event_bus';
+import TipsConfirm from '../../utils/tips_confirm';
+import playHistory from './history';
 
 const settingVisible = ref<boolean>(false);
 const route = useRoute();
@@ -77,6 +74,9 @@ const showSetting = () => {
 };
 
 const id = route.query.id || null;
+let lastRecent = null
+
+
 if (id) {
   handleGetVideo();
 }
@@ -93,6 +93,11 @@ function handleGetVideo() {
         episode.file_path = resp.data.path;
       }
     });
+
+    lastRecent = playHistory.getRecentEpisod(Number(id))
+    if (lastRecent) {
+      historyTips.newTipConfirm(`检测到上次播放到第${lastRecent.index}集，是否继续播放`, -1)
+    }
   });
 }
 
@@ -102,7 +107,7 @@ function updateSetting() {
   handleGetVideo();
 }
 
-function playVideo(item: any,index:number) {
+function playVideo(index: number) {
   store.set('CURRENT_VIDEO', video, true);
   router.push({
     path: '/video/player',
@@ -128,6 +133,16 @@ let menus = [
     clickFunc: showSetting,
   },
 ];
+
+const historyTips = new TipsConfirm(document.getElementById('content') as Element, {
+  okCallback: () => {
+    playVideo(lastRecent!.index-1)
+  },
+  cancelCallback: () => { },
+})
+
+
+
 setMenu(menus);
 onUnmounted(() => {
   setMenu([]);
@@ -155,6 +170,7 @@ onUnmounted(() => {
   flex-wrap: wrap;
   position: relative;
   z-index: 4;
+
   .episode-item {
     width: 78px;
     height: 32px;
@@ -170,16 +186,14 @@ onUnmounted(() => {
 
 .mask {
   position: absolute;
-  background: linear-gradient(
-    90deg,
-    rgba(1, 1, 1, 1),
-    rgba(1, 1, 1, 0.9),
-    rgba(1, 1, 1, 0.8),
-    rgba(1, 1, 1, 0.7),
-    rgba(1, 1, 1, 0.4),
-    rgba(1, 1, 1, 0),
-    rgba(1, 1, 1, 0)
-  );
+  background: linear-gradient(90deg,
+      rgba(1, 1, 1, 1),
+      rgba(1, 1, 1, 0.9),
+      rgba(1, 1, 1, 0.8),
+      rgba(1, 1, 1, 0.7),
+      rgba(1, 1, 1, 0.4),
+      rgba(1, 1, 1, 0),
+      rgba(1, 1, 1, 0));
   opacity: 0.7;
   top: 0;
   left: 0;
@@ -188,6 +202,7 @@ onUnmounted(() => {
 
 .info-box {
   justify-content: space-between;
+
   //   position: relative;
   .left {
     z-index: 3;

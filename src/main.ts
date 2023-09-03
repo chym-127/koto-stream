@@ -1,5 +1,6 @@
 import { createApp } from "vue";
 import "./styles.css";
+import './utils/tips_confirm.less'
 import Antd from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';
 import App from "./App.vue";

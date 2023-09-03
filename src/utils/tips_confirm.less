@@ -1,0 +1,43 @@
+.tip-confirm {
+    top: 0;
+    left: 0;
+    right: 0;
+    display: none;
+    position: absolute;
+    z-index: 9999;
+
+    .content-box {
+        display: flex;
+        padding: 5px 4px;
+        justify-content: space-between;
+        height: 32px;
+        background-color: rgba(0, 0, 0, 0.4);
+
+        .left {
+            font-size: 12px;
+            padding-left: 10px;
+            justify-content: center;
+            color: #a0a0a0;
+        }
+
+        .right {
+            .action-btn {
+                min-width: 20px;
+                text-align: center;
+                height: 100%;
+                background-color: rgba(255, 255, 255, 0.8);
+                cursor: pointer;
+                margin: 0 4px;
+                padding: 0 4px;
+                color: #666;
+                font-size: 8px;
+                line-height: 22px;
+
+                &:hover {
+                    background-color: rgba(255, 255, 255, 1);
+                    color: #000;
+                }
+            }
+        }
+    }
+}

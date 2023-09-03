@@ -39,6 +39,7 @@ class PlayHistory {
     getRecentEpisod(videoId: number): (RecentEpisodRecord | null) {
         let videoIdStr = String(videoId)
         let data: { [key: number]: History } = store.get(videoIdStr) || null
+
         if (data) {
             let newRecord: RecentEpisodRecord = {
                 index: 0,

@@ -36,6 +36,7 @@ import { message } from 'ant-design-vue';
 import playHistory from '../video/history';
 import appConfig from '../../utils/config';
 import windowHelper, { WindowSize } from '../../utils/window_helper';
+import TipsConfirm from '../../utils/tips_confirm';
 
 const url = ref('');
 const totalDuration = ref(0);
@@ -62,14 +63,6 @@ const setMenu = (menus: any) => {
   eventBus.publicize(msg);
 };
 
-const pushTipsConfirm = (data: Tips) => {
-  let msg: EventMsg = {
-    id: 'new-tips-confirm',
-    name: '设置Tips',
-    data: data,
-  };
-  eventBus.publicize(msg);
-}
 
 const toggleMenuBar = (visible: boolean) => {
   let msg: EventMsg = {
@@ -124,14 +117,8 @@ const onDown = (e: Episode) => {
 onUnmounted(() => {
   setMenu([]);
   restoreWindow();
-  let msg: EventMsg = {
-    id: 'new-tips-confirm',
-    name: '设置Tips',
-    data: null,
-  };
-  eventBus.publicize(msg);
-  videoInstance.replaceWith(videoInstance.cloneNode(true));
-  eventBus.off('tips-confirm-event', tipClick)
+  // videoInstance.replaceWith(videoInstance.cloneNode(true));
+  videoInstance = null
 });
 
 onMounted(() => {
@@ -253,8 +240,8 @@ const initWindow = async () => {
   }
   if (windowHelper.currentWindowSize === WindowSize.MINI) {
     toggleMenuBar(false);
-    await windowHelper.alwaysOnTop(true);
   }
+  await windowHelper.alwaysOnTop(true);
 };
 
 //恢复窗口状态
@@ -295,6 +282,12 @@ function seekVideo(second: number, flag: boolean = false) {
 //播放记录相关逻辑
 const progressStr = ref('');
 const progress = ref(0);
+const historyTips = new TipsConfirm(document.getElementById('content') as Element, {
+  okCallback: () => {
+    clickHistoryTips(progress.value)
+  },
+  cancelCallback: () => { },
+})
 
 let progressState = 0;
 function addHistory(progress: number) {
@@ -307,20 +300,9 @@ function checkHasHistory() {
   if (data && data.progress) {
     progress.value = data.progress;
     progressStr.value = new Date(data.progress * 1000).toISOString().slice(11, 19);
-    let tip: Tips = {
-      context: `上次播放至 ${progressStr.value},是否继续播放`,
-      tipName: 'seek-video',
-      leftTime: 10,
-    }
-    pushTipsConfirm(tip)
+    historyTips.newTipConfirm(`上次播放至 ${progressStr.value},是否继续播放`, 10)
   }
 }
-const tipClick = (data: any) => {
-  if (data.tipName === 'seek-video' && data.event === 'ok') {
-    clickHistoryTips(progress.value)
-  }
-}
-eventBus.on('tips-confirm-event', tipClick)
 
 const clickHistoryTips = (second: number) => {
   seekVideo(second, true);
