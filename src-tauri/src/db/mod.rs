@@ -23,7 +23,8 @@ pub fn init() -> Result<()> {
             score VARCHAR(255),
             class VARCHAR(255),
             otitle VARCHAR(255),
-            bg VARCHAR(255)
+            bg VARCHAR(255),
+            expand TEXT
         )",
         (), // empty list of parameters.
     )?;
@@ -32,6 +33,7 @@ pub fn init() -> Result<()> {
 }
 
 pub fn get_conn() -> Connection {
-    let res: std::result::Result<Connection, rusqlite::Error> = Connection::open(config::get_db_path());
+    let res: std::result::Result<Connection, rusqlite::Error> =
+        Connection::open(config::get_db_path());
     res.unwrap()
 }

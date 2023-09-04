@@ -1,8 +1,11 @@
 <template>
   <div class="full" style="position: relative">
-    <div class="mask" v-if="playListModalVisible"
+    <div
+      class="mask"
+      v-if="playListModalVisible"
       style="position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: transparent; z-index: 2"
-      @click="togglePlayListModal"></div>
+      @click="togglePlayListModal"
+    ></div>
 
     <div class="episode-list" :class="playListModalVisible ? 'show' : 'hide'">
       <div class="flex-row" style="flex-wrap: wrap">
@@ -16,9 +19,18 @@
     <div class="video-name">
       <span>{{ currentVideo.title }}-{{ currentEpisode?.title }}</span>
     </div>
-    <video id="videoInstance" autoplay @click.prevent="playOrPause()" controls
-      controlslist="nodownload nofullscreen noremoteplayback" height="100%" width="100%" preload="auto" data-setup="{}"
-      class="video-box"></video>
+    <video
+      id="videoInstance"
+      autoplay
+      @click.prevent="playOrPause()"
+      controls
+      controlslist="nodownload nofullscreen noremoteplayback"
+      height="100%"
+      width="100%"
+      preload="auto"
+      data-setup="{}"
+      class="video-box"
+    ></video>
   </div>
 </template>
 
@@ -45,11 +57,14 @@ const route = useRoute();
 const currentVideo = reactive<VideoInfo>(store.get('CURRENT_VIDEO'));
 
 let currentEpisode: Episode | undefined;
+let videoPlayConfig: VideoPlayConfig | undefined;
+
 let currentIndex = ref<number>(Number(route.query.index));
 if (currentVideo) {
   currentEpisode = currentVideo.episodes?.find((item, index) => {
     return index === currentIndex.value;
   });
+  videoPlayConfig = currentVideo.expand;
 }
 let videoInstance: any = null;
 let hls: Hls | null = null;
@@ -62,7 +77,6 @@ const setMenu = (menus: any) => {
   };
   eventBus.publicize(msg);
 };
-
 
 const toggleMenuBar = (visible: boolean) => {
   let msg: EventMsg = {
@@ -117,36 +131,33 @@ const onDown = (e: Episode) => {
 onUnmounted(() => {
   setMenu([]);
   restoreWindow();
-  historyTips.destroy()
-  videoInstance = null
+  historyTips.destroy();
+  videoInstance.removeEventListener('timeupdate', timeupdate);
+  videoInstance = null;
 });
+
+function timeupdate() {
+  if (videoInstance && videoInstance.currentTime) {
+    if (videoInstance.currentTime - progressState > 2) {
+      addHistory(videoInstance.currentTime);
+    }
+    if (videoPlayConfig?.auto_skip && totalDuration) {
+      let t = videoPlayConfig.end_duration;
+      let diff = totalDuration.value - videoInstance.currentTime;
+      if (diff <= t) {
+        playNextVideo();
+      }
+    }
+  }
+}
 
 onMounted(() => {
   videoInstance = document.getElementById('videoInstance');
-  videoInstance.addEventListener(
-    'timeupdate',
-    function () {
-      if (videoInstance.currentTime) {
-        if (videoInstance.currentTime - progressState > 2) {
-          addHistory(videoInstance.currentTime);
-        }
-        if (appConfig.autoPlay && totalDuration) {
-          let t = appConfig.autoPlayOffset;
-          if (appConfig.autoPlayOffset < 1) {
-            t = totalDuration.value * appConfig.autoPlayOffset;
-          }
-          let diff = totalDuration.value - videoInstance.currentTime;
-          if (diff <= t) {
-            playNextVideo();
-          }
-        }
-      }
-    },
-    false
-  );
+  videoInstance.addEventListener('timeupdate', timeupdate, false);
   videoInstance.addEventListener('loadedmetadata', () => {
     totalDuration.value = videoInstance.duration;
   });
+
   if (Hls.isSupported()) {
     hls = new Hls();
     hls.on(Hls.Events.MEDIA_ATTACHED, function () {
@@ -172,6 +183,9 @@ const playVideo = (e: Episode, index: number) => {
     videoInstance.src = url.value;
   } else {
     hls!.loadSource(currentEpisode.url);
+  }
+  if (videoPlayConfig?.start_duration) {
+    videoInstance.currentTime = videoPlayConfig!.start_duration;
   }
   checkHasHistory();
 
@@ -219,9 +233,8 @@ register('CommandOrControl+Shift+M', () => {
   toggleWindowSize();
 });
 
-
 register('CommandOrControl+Shift+F', () => {
-  windowHelper.maxScreen()
+  windowHelper.maxScreen();
 });
 
 //窗口逻辑
@@ -289,10 +302,10 @@ const progressStr = ref('');
 const progress = ref(0);
 const historyTips = new TipsConfirm(document.getElementById('content') as Element, {
   okCallback: () => {
-    clickHistoryTips(progress.value)
+    clickHistoryTips(progress.value);
   },
-  cancelCallback: () => { },
-})
+  cancelCallback: () => {},
+});
 
 let progressState = 0;
 function addHistory(progress: number) {
@@ -305,7 +318,7 @@ function checkHasHistory() {
   if (data && data.progress) {
     progress.value = data.progress;
     progressStr.value = new Date(data.progress * 1000).toISOString().slice(11, 19);
-    historyTips.newTipConfirm(`上次播放至 ${progressStr.value},是否继续播放`, 10)
+    historyTips.newTipConfirm(`上次播放至 ${progressStr.value},是否继续播放`, 10);
   }
 }
 

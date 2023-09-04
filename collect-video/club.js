@@ -16,8 +16,14 @@ function getVideoInfoFromClub(MOVS) {
         let metaDom = document.getElementsByClassName('product-header')[0]
         let obj = {}
 
+        let imgEl = metaDom.querySelector('div.image-x > img')
+        if (imgEl) {
+            obj.image = imgEl.getAttribute('src')
+        }
+
         let titleDom = document.getElementsByClassName("product-title")[0]
-        obj.title = titleDom.textContent
+        obj.title = titleDom.firstChild.textContent
+        obj.release_date = titleDom.querySelector('span:nth-child(1)').textContent.slice(1, -1)
         obj.score = titleDom.getElementsByClassName('rate')[0].innerText
 
         let arrDom = document.getElementsByClassName('product-excerpt')

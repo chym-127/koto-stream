@@ -43,13 +43,18 @@
       </div>
     </div>
 
-    <Setting v-model:visible="settingVisible" :style="{ position: 'absolute' }" ref="setting" :info="video"
-      @update="updateSetting"></Setting>
+    <Setting
+      v-model:visible="settingVisible"
+      :style="{ position: 'absolute' }"
+      ref="setting"
+      :info="video"
+      @update="updateSetting"
+    ></Setting>
   </div>
 </template>
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { onUnmounted, reactive, ref } from 'vue';
+import { onUnmounted, onMounted, reactive, ref } from 'vue';
 import { invoke } from '@tauri-apps/api/tauri';
 import { message } from 'ant-design-vue';
 import defaultBg from '../../assets/image/bg.webp';
@@ -74,8 +79,7 @@ const showSetting = () => {
 };
 
 const id = route.query.id || null;
-let lastRecent: RecentEpisodRecord | null = null
-
+let lastRecent: RecentEpisodRecord | null = null;
 
 if (id) {
   handleGetVideo();
@@ -86,6 +90,7 @@ function handleGetVideo() {
   }).then((resp: any) => {
     Object.assign(video, resp.data);
     video.episodes = JSON.parse(video.episodes);
+    video.expand = video.expand ? JSON.parse(video.expand) : {};
     video.episodes.forEach(async (episode: Episode) => {
       let file_path = video.id + '\\' + episode.index + '.mp4';
       let resp: any = await invoke('handle_exists_file', { path: file_path });
@@ -94,9 +99,9 @@ function handleGetVideo() {
       }
     });
 
-    lastRecent = playHistory.getRecentEpisod(Number(id))
+    lastRecent = playHistory.getRecentEpisod(Number(id));
     if (lastRecent) {
-      historyTips.newTipConfirm(`检测到上次播放到第${lastRecent.index}集，是否继续播放`, -1)
+      historyTips.newTipConfirm(`检测到上次播放到第${lastRecent.index}集，是否继续播放`, -1);
     }
   });
 }
@@ -136,17 +141,17 @@ let menus = [
 
 const historyTips = new TipsConfirm(document.getElementById('content') as Element, {
   okCallback: () => {
-    playVideo(lastRecent!.index - 1)
+    playVideo(lastRecent!.index - 1);
   },
-  cancelCallback: () => { },
-})
+  cancelCallback: () => {},
+});
 
-
-
-setMenu(menus);
+onMounted(() => {
+  setMenu(menus);
+});
 onUnmounted(() => {
   setMenu([]);
-  historyTips.destroy()
+  historyTips.destroy();
 });
 </script>
 
@@ -187,14 +192,16 @@ onUnmounted(() => {
 
 .mask {
   position: absolute;
-  background: linear-gradient(90deg,
-      rgba(1, 1, 1, 1),
-      rgba(1, 1, 1, 0.9),
-      rgba(1, 1, 1, 0.8),
-      rgba(1, 1, 1, 0.7),
-      rgba(1, 1, 1, 0.4),
-      rgba(1, 1, 1, 0),
-      rgba(1, 1, 1, 0));
+  background: linear-gradient(
+    90deg,
+    rgba(1, 1, 1, 1),
+    rgba(1, 1, 1, 0.9),
+    rgba(1, 1, 1, 0.8),
+    rgba(1, 1, 1, 0.7),
+    rgba(1, 1, 1, 0.4),
+    rgba(1, 1, 1, 0),
+    rgba(1, 1, 1, 0)
+  );
   opacity: 0.7;
   top: 0;
   left: 0;

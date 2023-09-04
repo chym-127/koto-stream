@@ -1,11 +1,10 @@
+use super::config;
 use super::get_conn;
 use rusqlite::Error::QueryReturnedNoRows;
 use rusqlite::{params, Error, Result};
-use super::config;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
-
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Video {
@@ -22,6 +21,7 @@ pub struct Video {
     pub class: Option<String>,
     pub otitle: Option<String>,
     pub episodes: Option<String>,
+    pub expand: Option<String>,
     pub bg: Option<String>,
 }
 
@@ -42,7 +42,8 @@ pub fn all(p: &super::super::ListVideoReq) -> Result<Vec<Video>, Error> {
         class,
         otitle,
         episodes,
-        bg 
+        bg,
+        expand
         FROM videos LIMIT ?1 OFFSET ?2",
     )?;
     // let person_iter = stmt.unwrap().query([]);
@@ -62,6 +63,7 @@ pub fn all(p: &super::super::ListVideoReq) -> Result<Vec<Video>, Error> {
             otitle: row.get(11)?,
             episodes: row.get(12)?,
             bg: row.get(13)?,
+            expand: row.get(14)?,
         })
     })?;
 
@@ -72,10 +74,9 @@ pub fn all(p: &super::super::ListVideoReq) -> Result<Vec<Video>, Error> {
     Ok(resp)
 }
 
-
-pub fn create_video_dir(t: &Video){
+pub fn create_video_dir(t: &Video) {
     let resp = find_by_name(t.title.clone().unwrap());
-    if let Ok(Some(r)) = resp{
+    if let Ok(Some(r)) = resp {
         let path_str = config::get_work_path();
         let path = Path::new(&path_str).join(r.id.unwrap().to_string());
         _ = fs::create_dir_all(path.clone());
@@ -98,7 +99,8 @@ pub fn create(t: &Video) -> Result<(), Error> {
             class,
             otitle,
             episodes,
-            bg ) VALUES (?1, ?2,?3,?4, ?5,?6,?7, ?8,?9,?10, ?11,?12,?13)",
+            bg ,
+            expand ) VALUES (?1, ?2,?3,?4, ?5,?6,?7, ?8,?9,?10, ?11,?12,?13,?14)",
         (
             &t.title,
             &t.image,
@@ -113,6 +115,7 @@ pub fn create(t: &Video) -> Result<(), Error> {
             &t.otitle,
             &t.episodes,
             &t.bg,
+            &t.expand,
         ),
     )?;
 
@@ -136,8 +139,9 @@ pub fn update(t: &Video) -> Result<(), Error> {
         class = ?10 , 
         otitle = ?11 , 
         episodes = ?12,
-        bg = ?13
-        WHERE id = ?14",
+        bg = ?13,
+        expand = ?14
+        WHERE id = ?15",
         (
             &t.title,
             &t.image,
@@ -152,6 +156,7 @@ pub fn update(t: &Video) -> Result<(), Error> {
             &t.otitle,
             &t.episodes,
             &t.bg,
+            &t.expand,
             &t.id,
         ),
     )?;
@@ -174,7 +179,8 @@ pub fn find_one(id: usize) -> Result<Option<Video>, Error> {
     class,
     otitle,
     episodes,
-    bg FROM videos WHERE id = ?1",
+    bg,
+    expand FROM videos WHERE id = ?1",
     )?;
     let row: std::result::Result<Option<Video>, Error> = stmt.query_row(params!(id), |row| {
         Ok(Some(Video {
@@ -192,6 +198,7 @@ pub fn find_one(id: usize) -> Result<Option<Video>, Error> {
             otitle: row.get(11)?,
             episodes: row.get(12)?,
             bg: row.get(13)?,
+            expand: row.get(14)?,
         }))
     });
     if let Err(QueryReturnedNoRows) = row {
@@ -203,7 +210,8 @@ pub fn find_one(id: usize) -> Result<Option<Video>, Error> {
 pub fn find_by_name(title: String) -> Result<Option<Video>, Error> {
     let conn = get_conn();
     let mut stmt = conn.prepare(
-        "SELECT id, title,
+        "SELECT id, 
+    title,
     image,
     description,
     actor,
@@ -215,7 +223,7 @@ pub fn find_by_name(title: String) -> Result<Option<Video>, Error> {
     class,
     otitle,
     episodes,
-    bg FROM videos WHERE title = ?1",
+    bg,expand FROM videos WHERE title = ?1",
     )?;
     let row: std::result::Result<Option<Video>, Error> = stmt.query_row(params!(title), |row| {
         Ok(Some(Video {
@@ -233,6 +241,7 @@ pub fn find_by_name(title: String) -> Result<Option<Video>, Error> {
             otitle: row.get(11)?,
             episodes: row.get(12)?,
             bg: row.get(13)?,
+            expand: row.get(14)?,
         }))
     });
     if let Err(QueryReturnedNoRows) = row {
