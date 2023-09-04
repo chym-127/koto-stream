@@ -10,8 +10,7 @@
       ],
       "run_at": "document_end",
       "js": [
-        "common.js",
-        "com.js"
+        "contentscript.js"
       ]
     },
     {
@@ -25,5 +24,17 @@
       ]
     }
   ],
-  "host_permissions": ["<all_urls>"]
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "com.js"
+      ],
+      "matches": [
+        "https://www.dandanzan.com/*"
+      ]
+    }
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
 }
