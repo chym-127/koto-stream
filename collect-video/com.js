@@ -50,30 +50,6 @@
 
 })(XMLHttpRequest);
 
-function getChildIndex(node) {
-    return Array.prototype.indexOf.call(node.parentNode.childNodes, node);
-}
-
-
-
-// (function () {
-//     window.episodes = {}
-//     let el = document.createElement("button")
-//     el.innerText = "采集视频"
-//     el.style.position = "fixed"
-//     el.style.top = "20px"
-//     el.style.right = "20px"
-//     el.style.zIndex = 999999
-//     el.addEventListener("click", e => {
-//         window.saveVod()
-//     })
-//     if (document.body) {
-//         setTimeout(() => {
-//             document.body.appendChild(el)
-//         }, 3000);
-//     }
-// })();
-
 
 (function () {
     window.episodes = {}
@@ -102,7 +78,7 @@ function getChildIndex(node) {
     if (document.body) {
         setTimeout(() => {
             document.body.appendChild(el)
-        }, 3000);
+        }, 1000);
     }
 })();
 
@@ -116,18 +92,6 @@ function startNext(node) {
     }
 }
 
-function getChildByIndex(node, index) {
-    const list = node.children;
-
-    let children = null
-    for (let i = 0; i < list.length; i++) {
-        if (i === index) {
-            children = list[i]
-            break;
-        }
-    }
-    return children
-}
 
 window.saveCurrentVod = (title, url, index) => {
     window.episodes[index] = {
@@ -145,46 +109,13 @@ window.saveVod = function () {
         MOVS = {}
     }
 
-    if (location.href.indexOf('.com') !== -1) {
-        MOVS = getVideoInfoFromCom(MOVS)
-    }
+    MOVS = getVideoInfoFromCom(MOVS)
 
-    if (location.href.indexOf('.club') !== -1) {
-        MOVS = getVideoInfoFromClub(MOVS)
-    }
 
     localStorage.setItem("MOVS", JSON.stringify(MOVS))
 }
 
 
-function getVideoInfoFromClub(MOVS) {
-    console.log('getVideoInfoFromClub');
-    try {
-        let metaDom = document.getElementsByClassName('product-header')[0]
-        let obj = {}
-
-        let titleDom = document.getElementsByClassName("product-title")[0]
-        obj.title = titleDom.textContent
-        obj.score = titleDom.getElementsByClassName('rate')[0].innerText
-
-        let arrDom = document.getElementsByClassName('product-excerpt')
-        let arrKeys = ['director', 'actor', 'area', 'alias', 'description']
-        for (let index = 0; index < arrDom.length - 1; index++) {
-            const element = arrDom[index];
-            let value = element.getElementsByTagName("span")[0].innerText
-            obj[arrKeys[index]] = valu
-        }
-
-        let result = Object.keys(window.episodes).map((key) => window.episodes[key]);
-        obj["episodes"] = result
-        MOVS[obj.title] = obj
-    } catch (error) {
-        console.log(error);
-    }
-
-
-    return MOVS
-}
 
 
 function getVideoInfoFromCom(MOVS) {
@@ -210,4 +141,3 @@ function getVideoInfoFromCom(MOVS) {
     MOVS[window.infoid] = obj
     return MOVS
 }
-

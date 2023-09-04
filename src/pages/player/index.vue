@@ -253,9 +253,9 @@ const initWindow = async () => {
 const restoreWindow = async () => {
   if (windowHelper.currentWindowSize === WindowSize.MINI) {
     toggleMenuBar(true);
-    await windowHelper.alwaysOnTop(true);
     await windowHelper.normalScreen();
   }
+  await windowHelper.alwaysOnTop(false);
 };
 
 initWindow();

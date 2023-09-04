@@ -6,25 +6,24 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.dandanzan.com/*",
+        "https://www.dandanzan.com/*"
+      ],
+      "run_at": "document_end",
+      "js": [
+        "common.js",
+        "com.js"
+      ]
+    },
+    {
+      "matches": [
         "https://www.dandanzan.club/*"
       ],
       "run_at": "document_end",
       "js": [
-        "contentscript.js",
-        "inject.js"
+        "common.js",
+        "club.js"
       ]
     }
   ],
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "inject.js"
-      ],
-      "matches": [
-        "https://www.dandanzan.com/*",
-        "https://www.dandanzan.club/*"
-      ]
-    }
-  ]
+  "host_permissions": ["<all_urls>"]
 }
