@@ -90,7 +90,7 @@ function playNextVideo(nextNode) {
 
 (function () {
     window.autoCollect = localStorage.getItem('AUTO_COLLECT') || false
-
+    localStorage.setItem("EPISODES", {})
     let el = document.createElement("button")
     el.innerText = "自动采集"
     el.style.position = "fixed"
