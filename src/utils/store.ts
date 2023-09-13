@@ -45,7 +45,7 @@ class Store {
 
 
 const store = new Store("STORE")
+const settingStore = new Store('SETTING');
 
-
-export { Store }
+export { Store, settingStore }
 export default store

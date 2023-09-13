@@ -75,6 +75,10 @@ const menus = reactive<Menu[]>([
     id: 'IMPORT_VIDEO',
     name: '导入视频',
   },
+  {
+    id: 'SETTING',
+    name: '设置',
+  },
 ]);
 
 const customMenus = reactive<Menu[]>([]);

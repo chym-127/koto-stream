@@ -50,6 +50,8 @@
       :info="video"
       @update="updateSetting"
     ></Setting>
+
+    <Download2MediaHub :style="{ position: 'absolute' }" v-model:visible="mediaHubVisible" :info="video"></Download2MediaHub>
   </div>
 </template>
 <script setup lang="ts">
@@ -59,12 +61,15 @@ import { invoke } from '@tauri-apps/api/tauri';
 import { message } from 'ant-design-vue';
 import defaultBg from '../../assets/image/bg.webp';
 import Setting from './Setting.vue';
+import Download2MediaHub from './Download2MediaHub.vue';
 import store from '../../utils/store';
 import eventBus, { EventMsg } from '../../utils/event_bus';
 import TipsConfirm from '../../utils/tips_confirm';
 import playHistory, { RecentEpisodRecord } from './history';
 
 const settingVisible = ref<boolean>(false);
+const mediaHubVisible = ref<boolean>(false);
+
 const route = useRoute();
 const router = useRouter();
 const value = ref(1);
@@ -76,6 +81,10 @@ const showSetting = () => {
   if (settingVisible.value) {
     setting.value?.resetInfo();
   }
+};
+
+const showMediaHub = () => {
+  mediaHubVisible.value = !mediaHubVisible.value;
 };
 
 const id = route.query.id || null;
@@ -136,6 +145,11 @@ let menus = [
     id: 'DONWLOAD',
     name: '编辑视频',
     clickFunc: showSetting,
+  },
+  {
+    id: 'TOMEDIAHUB',
+    name: '保存到媒体库',
+    clickFunc: showMediaHub,
   },
 ];
 

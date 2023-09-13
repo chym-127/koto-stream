@@ -19,7 +19,8 @@ fn main() {
             handle_del_video,
             handle_down_file,
             handle_get_work_path,
-            handle_exists_file
+            handle_exists_file,
+            handle_create_dir
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -150,7 +151,7 @@ use std::path::Path;
 #[tauri::command]
 fn handle_down_file(req: DownFileReq) -> Resp<String> {
     let mut resp = reqwest::blocking::get(req.url).expect("request failed");
-    let output_path = Path::new(&config::get_work_path())
+    let output_path = Path::new("")
         .join(req.path)
         .join(req.file_name);
     let mut out = File::create(&output_path).expect("failed to create file");
@@ -158,7 +159,6 @@ fn handle_down_file(req: DownFileReq) -> Resp<String> {
     if let Err(_) = msg {
         println!("failed to copy file")
     }
-    println!("success");
     Resp {
         data: Some(output_path.as_path().display().to_string()),
         message: "success".to_string(),
@@ -189,6 +189,21 @@ fn handle_exists_file(path: String) -> Resp<ExistsFileAns> {
             exists: exists,
             path: file_path.as_path().display().to_string(),
         }),
+        message: "success".to_string(),
+        code: 200,
+    }
+}
+
+
+
+#[tauri::command]
+fn handle_create_dir(path: String) -> Resp<Empty> {
+    let err = fs::create_dir_all(path.clone());
+    if let Err(e) = err {
+        println!("{}",e);
+    }
+    Resp {
+        data: None,
         message: "success".to_string(),
         code: 200,
     }

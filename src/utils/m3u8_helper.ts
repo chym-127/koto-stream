@@ -47,17 +47,17 @@ class _M3u8Downloader {
     }
 
 
-    submitTask(task: M3u8DownTask) {
+    submitTask(task: M3u8DownTask): boolean {
         let found = this.all_queues.find(item => {
             return item.uuid === task.uuid
         })
         if (found) {
             message.warning("任务已存在~")
-            return
+            return false
         }
         this._queue.push(task)
         this.all_queues.push(task)
-        message.success("已加入下载队列")
+        // message.success("已加入下载队列")
 
         task.state = M3u8DownloaderEventEnum.QUEUE
         if (this._runingTaskCount <= this._maxQueue) {
@@ -67,10 +67,13 @@ class _M3u8Downloader {
                 this._download(_task)
             }
         }
+
+        return true
     }
 
     async _download(_task: M3u8DownTask) {
-        let args = ["-i", _task!.url, "-o", _task!.outputFilePath, "-c"]
+        let args = ["-i", _task!.url, "-o", _task!.outputFilePath, "-c", '-m']
+
         const command = new Command('m3u8_downloader', args, { cwd: _task.workPath });
         command.on('close', data => {
             if (data.code === 0) {
