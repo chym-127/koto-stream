@@ -103,7 +103,7 @@ const form = reactive<FormData>({
   title: '',
   type: 'movies',
   season: 1,
-  file_type: '.mp4',
+  file_type: '.m3u8',
   vods: [],
 });
 

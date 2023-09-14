@@ -72,7 +72,10 @@ class _M3u8Downloader {
     }
 
     async _download(_task: M3u8DownTask) {
+        console.log(_task);
+        
         let args = ["-i", _task!.url, "-o", _task!.outputFilePath, '-c']
+        console.log('m3u8_downloader', args.join(' '));
 
         const command = new Command('m3u8_downloader', args, { cwd: _task.workPath });
         command.on('close', data => {
@@ -117,7 +120,7 @@ class _M3u8Downloader {
             } catch (error) {
             }
         });
-        command.stderr.on('data', line => console.log(`command stderr: "${line}"`));
+        command.stderr.on('data', line => console.log(`command out: "${line}"`));
         const child = await command.spawn();
         this._processMapper[_task.uuid] = child
     }
