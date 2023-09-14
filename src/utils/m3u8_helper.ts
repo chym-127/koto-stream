@@ -72,7 +72,7 @@ class _M3u8Downloader {
     }
 
     async _download(_task: M3u8DownTask) {
-        let args = ["-i", _task!.url, "-o", _task!.outputFilePath, "-c", '-m']
+        let args = ["-i", _task!.url, "-o", _task!.outputFilePath, '-c']
 
         const command = new Command('m3u8_downloader', args, { cwd: _task.workPath });
         command.on('close', data => {
@@ -135,6 +135,16 @@ class _M3u8Downloader {
         }
     }
 
+    killAllTask() {
+        for (const key in this._processMapper) {
+            if (Object.prototype.hasOwnProperty.call(this._processMapper, key)) {
+                const p = this._processMapper[key];
+                p.kill()
+                delete this._processMapper[key]
+            }
+        }
+    }
+
     destroy() {
         for (const key in this._processMapper) {
             if (Object.prototype.hasOwnProperty.call(this._processMapper, key)) {
@@ -145,7 +155,7 @@ class _M3u8Downloader {
     }
 }
 
-const m3u8Downloader = new _M3u8Downloader()
+const m3u8Downloader = new _M3u8Downloader(4)
 
 export default m3u8Downloader
 export type { M3u8DownTask }

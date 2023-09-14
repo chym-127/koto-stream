@@ -146,14 +146,12 @@ pub struct DownFileReq {
 
 use std::fs::{self, File};
 use std::io;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[tauri::command]
 fn handle_down_file(req: DownFileReq) -> Resp<String> {
     let mut resp = reqwest::blocking::get(req.url).expect("request failed");
-    let output_path = Path::new("")
-        .join(req.path)
-        .join(req.file_name);
+    let output_path = Path::new("").join(req.path).join(req.file_name);
     let mut out = File::create(&output_path).expect("failed to create file");
     let msg = io::copy(&mut resp, &mut out);
     if let Err(_) = msg {
@@ -182,7 +180,7 @@ pub struct ExistsFileAns {
 }
 #[tauri::command]
 fn handle_exists_file(path: String) -> Resp<ExistsFileAns> {
-    let file_path = Path::new(&config::get_work_path()).join(path);
+    let file_path = PathBuf::from(&path.clone());
     let exists = file_path.exists();
     Resp {
         data: Some(ExistsFileAns {
@@ -194,13 +192,11 @@ fn handle_exists_file(path: String) -> Resp<ExistsFileAns> {
     }
 }
 
-
-
 #[tauri::command]
 fn handle_create_dir(path: String) -> Resp<Empty> {
     let err = fs::create_dir_all(path.clone());
     if let Err(e) = err {
-        println!("{}",e);
+        println!("{}", e);
     }
     Resp {
         data: None,

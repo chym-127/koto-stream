@@ -48,6 +48,13 @@
         </a-row>
         <a-row :gutter="16">
           <a-col :span="24">
+            <a-form-item label="第几季" name="title">
+              <a-input v-model:value="form.season" placeholder="请输入第几季" />
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <a-row :gutter="16">
+          <a-col :span="24">
             <a-form-item label="剧集" name="title">
               <div class="flex-row mb-8" style="align-items: center" v-for="(item, index) in form.vods" :key="index">
                 <span class="font-16-600" style="width: 40px">{{ item.index }}:</span>
@@ -85,6 +92,7 @@ interface Vod {
 interface FormData {
   id: number;
   title: string;
+  season: number;
   type: string;
   file_type: string;
   vods: Vod[];
@@ -94,26 +102,50 @@ const form = reactive<FormData>({
   id: 0,
   title: '',
   type: 'movies',
+  season: 1,
   file_type: '.mp4',
   vods: [],
 });
 
+const seasonMapper: { [key: string]: number } = {
+  一: 1,
+  二: 2,
+  三: 3,
+  四: 4,
+  五: 5,
+  六: 6,
+};
+
+const seasonReg = /第.?季/g;
+
 watch(props.info, (info) => {
+  try {
+    let s = (info.title.match(seasonReg) as String[])[0][1];
+    form.season = seasonMapper[s] || 1;
+  } catch (error) {
+    form.season = 1
+  }
+  let seasonStr = '';
+  if (form.season < 10) {
+    seasonStr = 'S0' + String(form.season);
+  } else {
+    seasonStr = 'S' + String(form.season);
+  }
+
   form.id = info.id;
-  form.title = info.title.replaceAll(' ', '');
+  form.title = info.title.replaceAll(' ', '').replace(seasonReg, '');
   if (info.episodes && info.episodes?.length > 1) {
     form.type = 'tvs';
   }
   form.vods.splice(0);
   info.episodes!.forEach((episode) => {
-    //S01E01-异人之下.mp4
     let eStr = String(episode.index);
     if (episode.index < 10) {
       eStr = '0' + eStr;
     }
     form.vods.push({
       title: episode.title,
-      tv_name: `S01E${eStr}-${form.title}`,
+      tv_name: `${seasonStr}E${eStr}`,
       movie_name: `${form.title}`,
       url: episode.url,
       index: episode.index,
@@ -135,12 +167,16 @@ const onSave = () => {
     form.vods.forEach((vod) => {
       let task: M3u8DownTask = {
         uuid: form.id + '-' + vod.index,
-        name: form.title + '-' + vod.title,
+        name: props.info.title + '-' + vod.title,
         url: vod.url,
         workPath: root_path,
         outputFilePath: root_path + '\\' + (form.type === 'tvs' ? vod.tv_name : vod.movie_name) + form.file_type,
       };
-      m3u8Downloader.submitTask(task);
+      invoke('handle_exists_file', { path: task.outputFilePath }).then((resp: any) => {
+        if (!resp.data.exists) {
+          m3u8Downloader.submitTask(task);
+        }
+      });
     });
     message.success('已加入下载队列，请前往下载中心查看');
   });

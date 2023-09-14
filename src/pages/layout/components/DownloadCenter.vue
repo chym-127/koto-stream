@@ -11,6 +11,7 @@
     @close="onClose"
   >
     <div style="padding: 0">
+      <a-button type="primary" @click="stopDown">停止</a-button>
       <a-table :columns="columns" :data-source="cloneDeep(taskList)" bordered>
         <template #bodyCell="{ column, text, record }: any">
           <template v-if="column.dataIndex === 'name'">
@@ -51,6 +52,10 @@ const menuClickCallback = function (data: any) {
   if (data.id === 'DOWNLOAD_CENTER') {
     toggleVisible();
   }
+};
+
+const stopDown = () => {
+  m3u8Downloader.killAllTask();
 };
 
 eventBus.on('menu-click', menuClickCallback);

@@ -68,7 +68,7 @@ import TipsConfirm from '../../utils/tips_confirm';
 import playHistory, { RecentEpisodRecord } from './history';
 
 const settingVisible = ref<boolean>(false);
-const mediaHubVisible = ref<boolean>(false);
+const mediaHubVisible = ref<boolean>(true);
 
 const route = useRoute();
 const router = useRouter();

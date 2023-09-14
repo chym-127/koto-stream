@@ -21,7 +21,7 @@ let items = reactive<any>([]);
 function handleListVideo() {
   invoke('handle_list_video', {
     req: {
-      page_size: 10,
+      page_size: 99999,
       page_num: 1,
     },
   }).then((resp: any) => {
