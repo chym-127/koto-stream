@@ -82,6 +82,24 @@
     }
 })();
 
+
+(function () {
+    window.episodes = {}
+    let el = document.createElement("button")
+    el.innerText = "发送数据"
+    el.style.position = "fixed"
+    el.style.bottom = "50px"
+    el.style.right = "20px"
+    el.style.zIndex = 999999
+    el.addEventListener("click", e => {
+        let MOVS = JSON.parse(localStorage.getItem("MOVS")) || {}
+        sendData(MOVS)
+    })
+    if (document.body) {
+        document.body.appendChild(el)
+    }
+})();
+
 function startNext(node) {
     node.click()
     let el = document.querySelector("dt[class='on']")
@@ -130,7 +148,12 @@ function getVideoInfoFromCom(MOVS) {
                 if (property.indexOf("og:") !== -1) {
                     let arr = property.split(":")
                     let key = arr[arr.length - 1]
-                    obj[key] = content
+                    if (key === 'title') {
+                        obj[key] = content
+                    }
+                    if (key === 'release_date') {
+                        obj['releaseDate'] = content
+                    }
                 }
             }
 

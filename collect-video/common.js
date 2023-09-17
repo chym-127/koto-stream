@@ -27,9 +27,24 @@ async function getM3u8UrlByUrl(url) {
             return url
         }
         if (line.indexOf('.m3u8') !== -1) {
-            console.log(line.trim(),baseUrl);
-            let u = new URL(line.trim(),baseUrl)
+            console.log(line.trim(), baseUrl);
+            let u = new URL(line.trim(), baseUrl)
             return u.href
         }
     }
 }
+
+
+function sendData(MOVS) {
+    for (const key in MOVS) {
+        if (Object.hasOwnProperty.call(MOVS, key)) {
+            const item = MOVS[key];
+            var xmlhttp = new XMLHttpRequest();
+            var url = 'http://127.0.0.1:8080/import/media';
+            xmlhttp.open("POST", url);
+            xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xmlhttp.send(JSON.stringify({medias:[item]}));
+        }
+    }
+}
+

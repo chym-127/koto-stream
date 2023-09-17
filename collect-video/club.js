@@ -6,7 +6,22 @@ window.saveVod = function () {
         MOVS = {}
     }
     MOVS = getVideoInfoFromClub(MOVS)
+
+    sendData(MOVS)
     localStorage.setItem("MOVS", JSON.stringify(MOVS))
+}
+
+function sendData(MOVS) {
+    for (const key in MOVS) {
+        if (Object.hasOwnProperty.call(MOVS, key)) {
+            const item = MOVS[key];
+            var xmlhttp = new XMLHttpRequest();
+            var url = 'http://127.0.0.1:8080/import/media';
+            xmlhttp.open("POST", url);
+            xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xmlhttp.send(JSON.stringify({medias:[item]}));
+        }
+    }
 }
 
 
@@ -24,15 +39,15 @@ function getVideoInfoFromClub(MOVS) {
         let titleDom = document.getElementsByClassName("product-title")[0]
         obj.title = titleDom.firstChild.textContent
         obj.release_date = titleDom.querySelector('span:nth-child(1)').textContent.slice(1, -1)
-        obj.score = titleDom.getElementsByClassName('rate')[0].innerText
+        // obj.score = titleDom.getElementsByClassName('rate')[0].innerText
 
-        let arrDom = document.getElementsByClassName('product-excerpt')
-        let arrKeys = ['director', 'actor', 'area', 'alias', 'description']
-        for (let index = 0; index < arrDom.length - 1; index++) {
-            const element = arrDom[index];
-            let value = element.getElementsByTagName("span")[0].innerText
-            obj[arrKeys[index]] = value
-        }
+        // let arrDom = document.getElementsByClassName('product-excerpt')
+        // let arrKeys = ['director', 'actor', 'area', 'alias', 'description']
+        // for (let index = 0; index < arrDom.length - 1; index++) {
+        //     const element = arrDom[index];
+        //     let value = element.getElementsByTagName("span")[0].innerText
+        //     obj[arrKeys[index]] = value
+        // }
         window.episodes = localStorage.getItem('EPISODES') ? JSON.parse(localStorage.getItem('EPISODES')) : {}
         let result = Object.keys(window.episodes).map((key) => window.episodes[key]);
         obj["episodes"] = result
@@ -89,8 +104,24 @@ function playNextVideo(nextNode) {
 
 
 (function () {
+    window.episodes = {}
+    let el = document.createElement("button")
+    el.innerText = "发送数据"
+    el.style.position = "fixed"
+    el.style.bottom = "50px"
+    el.style.right = "20px"
+    el.style.zIndex = 999999
+    el.addEventListener("click", e => {
+        let MOVS = JSON.parse(localStorage.getItem("MOVS")) || {}
+        sendData(MOVS)
+    })
+    if (document.body) {
+        document.body.appendChild(el)
+    }
+})();
+
+(function () {
     window.autoCollect = localStorage.getItem('AUTO_COLLECT') || false
-    localStorage.setItem("EPISODES", {})
     let el = document.createElement("button")
     el.innerText = "自动采集"
     el.style.position = "fixed"
@@ -98,6 +129,7 @@ function playNextVideo(nextNode) {
     el.style.right = "20px"
     el.style.zIndex = 999999
     el.addEventListener("click", e => {
+        localStorage.setItem("EPISODES", '')
         let currentVod = document.querySelector("li[class='on']")
         if (currentVod) {
             localStorage.setItem('AUTO_COLLECT', "true")
