@@ -40,7 +40,7 @@ function getVideoInfoFromClub(MOVS) {
         }
 
         let titleDom = document.getElementsByClassName("product-title")[0]
-        obj.title = titleDom.firstChild.textContent
+        obj.title = titleDom.firstChild.textContent.replaceAll(seasonReg, "")
         obj.release_date = Number(titleDom.querySelector('span:nth-child(1)').textContent.slice(1, -1))
         // obj.score = titleDom.getElementsByClassName('rate')[0].innerText
 

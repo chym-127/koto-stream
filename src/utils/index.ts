@@ -79,4 +79,11 @@ const formatSeconds = (seconds: number, format: string = 'HHMMSS') => {
   return temp;
 };
 
-export { holdResponse, getElementById, formatSeconds };
+import { convertFileSrc } from '@tauri-apps/api/tauri';
+
+function getMediaLocalResouce(v: VideoInfo, fileName: string) { 
+  let workPath = "E:\\media\\" + (v.type === 1 ? 'movies' : 'tvs') + `\\${v.title}(${v.release_date})\\` + fileName
+  return convertFileSrc(workPath)
+}
+
+export { holdResponse, getElementById, formatSeconds, getMediaLocalResouce };

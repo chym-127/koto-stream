@@ -184,7 +184,7 @@ function getVideoInfoFromCom(MOVS) {
                     let arr = property.split(":")
                     let key = arr[arr.length - 1]
                     if (key === 'title') {
-                        obj[key] = content
+                        obj[key] = content.replaceAll(seasonReg, "")
                     }
                     if (key === 'release_date') {
                         obj['release_date'] = Number(content)

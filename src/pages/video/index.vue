@@ -1,6 +1,8 @@
 <template>
   <div class="full" style="position: relative">
-    <div class="bg full" v-if="video.fanart_url" :style="{ backgroundImage: 'url(' + video.fanart_url + ')' }"></div>
+    <div class="bg full" v-if="video.fanart_url">
+      <img :src="bgPath" alt="" srcset="" style="width: 100%;height: 100%;">
+    </div>
     <div class="bg full" v-else :style="{ backgroundImage: 'url(' + defaultBg + ')' }"></div>
     <div class="mask full"></div>
     <div class="flex-row info-box" style="padding: 30px 40px 30px 40px">
@@ -11,7 +13,7 @@
         </div>
         <div class="c-fff font-16-400">
           <a-rate :count="1" v-model:value="value" />
-          <span class="ml-4">{{ video.score!.toFixed(1) }}/10</span>
+          <span class="ml-4" v-if="video.score">{{ video.score!.toFixed(1) }}/10</span>
         </div>
         <div class="desc ellips-8 font-14-400 c-c9c9c mt-12">
           <span class="c-999">剧情简介：</span>
@@ -23,7 +25,7 @@
       <div class="right">
         <div class="pic">
           <div class="mask1"></div>
-          <img :src="video.poster_url" alt="" srcset="" />
+          <img v-if="video.poster_url" :src="getMediaLocalResouce(video, 'poster.jpg')" alt="" srcset="" />
         </div>
       </div>
     </div>
@@ -50,8 +52,8 @@ import { onUnmounted, onMounted, reactive, ref } from 'vue';
 import { message } from 'ant-design-vue';
 import defaultBg from '../../assets/image/bg.webp';
 import Setting from './Setting.vue';
-import Download2MediaHub from './Download2MediaHub.vue';
 import store from '../../utils/store';
+import { getMediaLocalResouce } from '../../utils/index';
 import eventBus, { EventMsg } from '../../utils/event_bus';
 import TipsConfirm from '../../utils/tips_confirm';
 import playHistory, { RecentEpisodRecord } from './history';
@@ -62,6 +64,8 @@ const settingVisible = ref<boolean>(false);
 const route = useRoute();
 const router = useRouter();
 const value = ref(1);
+const bgPath = ref('');
+
 const video = reactive<VideoInfo>({
   id: 0,
   title: '',
@@ -84,7 +88,8 @@ if (id) {
 function handleGetVideo() {
   getMediaByID({ id: Number(id) }).then((resp: any) => {
     Object.assign(video, resp.data);
-
+    bgPath.value = getMediaLocalResouce(video, 'fanart.jpg');
+    
     lastRecent = playHistory.getRecentEpisod(Number(id));
     if (lastRecent) {
       historyTips.newTipConfirm(`检测到上次播放到第${lastRecent.index}集，是否继续播放`, -1);
