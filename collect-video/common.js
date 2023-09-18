@@ -18,20 +18,24 @@ function getChildByIndex(node, index) {
 
 let reg = /\/[^\/]*.m3u8/g
 async function getM3u8UrlByUrl(url) {
-    const response = await fetch(url);
-    let arr = (await response.text()).split('\n');
-    let baseUrl = url.replace(reg, '/')
-    for (let index = 0; index < arr.length; index++) {
-        const line = arr[index];
-        if (line.indexOf('#EXT-X-PLAYLIST-TYPE:VOD') !== -1) {
-            return url
+    try {
+        const response = await fetch(url);
+        let arr = (await response.text()).split('\n');
+        let baseUrl = url.replace(reg, '/')
+        for (let index = 0; index < arr.length; index++) {
+            const line = arr[index];
+            if (line.indexOf('#EXT-X-PLAYLIST-TYPE:VOD') !== -1) {
+                return url
+            }
+            if (line.indexOf('.m3u8') !== -1) {
+                console.log(line.trim(), baseUrl);
+                let u = new URL(line.trim(), baseUrl)
+                return u.href
+            }
         }
-        if (line.indexOf('.m3u8') !== -1) {
-            console.log(line.trim(), baseUrl);
-            let u = new URL(line.trim(), baseUrl)
-            return u.href
-        }
+    } catch (error) {
     }
+    return url
 }
 
 

@@ -77,6 +77,7 @@ const seasonReg = /第.?季/g;
     window.episodes = localStorage.getItem('EPISODES') ? JSON.parse(localStorage.getItem('EPISODES')) : {}
     let el = document.querySelector('#playleft > iframe')
     if (el) {
+        
         let src = el.getAttribute('src')
         let found = src.match(reg)
         let currentVod = document.querySelector("li[class='on']")
