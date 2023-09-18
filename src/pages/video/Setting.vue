@@ -11,90 +11,10 @@
   >
     <div class="full flex-column" style="overflow: hidden">
       <a-tabs v-model:activeKey="activeKey">
-        <a-tab-pane key="1" tab="基础信息"></a-tab-pane>
         <a-tab-pane key="2" tab="剧集" force-render></a-tab-pane>
         <a-tab-pane key="3" tab="播放设置" force-render></a-tab-pane>
       </a-tabs>
       <div class="h-0 flex-1" style="overflow: auto">
-        <div style="padding: 0 24px 24px 24px" v-show="activeKey === '1'">
-          <a-form :model="form" :rules="rules" layout="vertical">
-            <a-row :gutter="16">
-              <a-col :span="12">
-                <a-form-item label="名称" name="title" v-bind="validateInfos.title">
-                  <a-input v-model:value="form.title" placeholder="请输入名称" />
-                </a-form-item>
-              </a-col>
-              <a-col :span="12">
-                <a-form-item label="导演">
-                  <a-input v-model:value="form.director" style="width: 100%" placeholder="请输入导演名" />
-                </a-form-item>
-              </a-col>
-            </a-row>
-            <a-row :gutter="16">
-              <a-col :span="12">
-                <a-form-item label="演员">
-                  <a-input v-model:value="form.actor" style="width: 100%" placeholder="请输入演员名" />
-                </a-form-item>
-              </a-col>
-              <a-col :span="12">
-                <a-form-item label="类型">
-                  <a-input v-model:value="form.class" style="width: 100%" placeholder="请输入类型" />
-                </a-form-item>
-              </a-col>
-            </a-row>
-            <a-row :gutter="16">
-              <a-col :span="12">
-                <a-form-item label="制片国家">
-                  <a-input v-model:value="form.area" style="width: 100%" placeholder="请输入制片国家" />
-                </a-form-item>
-              </a-col>
-              <a-col :span="12">
-                <a-form-item label="又名">
-                  <a-input v-model:value="form.alias" style="width: 100%" placeholder="请输入类型" />
-                </a-form-item>
-              </a-col>
-            </a-row>
-            <a-row :gutter="16">
-              <a-col :span="12">
-                <a-form-item label="封面图">
-                  <a-input-group compact>
-                    <a-input v-model:value="form.image" style="width: calc(100% - 100px)" placeholder="请输入封面图" />
-                    <a-button
-                      type="primary"
-                      style="width: 100px"
-                      :loading="imageLoading"
-                      @click="saveToLocal(form.image!, 'image.png', 'image')"
-                    >
-                      下载
-                    </a-button>
-                  </a-input-group>
-                </a-form-item>
-              </a-col>
-              <a-col :span="12">
-                <a-form-item label="背景墙">
-                  <a-input-group compact>
-                    <a-input v-model:value="form.bg" style="width: calc(100% - 100px)" placeholder="请输入背景墙图片" />
-                    <a-button
-                      type="primary"
-                      style="width: 100px"
-                      :loading="bgLoading"
-                      @click="saveToLocal(form.bg!, 'bg.png', 'bg')"
-                    >
-                      下载
-                    </a-button>
-                  </a-input-group>
-                </a-form-item>
-              </a-col>
-            </a-row>
-            <a-row :gutter="16">
-              <a-col :span="24">
-                <a-form-item label="剧情简介" name="description">
-                  <a-textarea v-model:value="form.description" :rows="15" placeholder="请输入剧情简介" />
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-form>
-        </div>
         <div style="padding: 0 24px 24px 24px" v-show="activeKey === '2'">
           <a-table :columns="columns" :data-source="form.episodes" bordered>
             <template #bodyCell="{ column, text, record }: any">
@@ -163,19 +83,11 @@ const emit = defineEmits(['update:visible', 'update']);
 
 const form = reactive<VideoInfo>({
   id: 0,
-  actor: '',
-  alias: '',
-  area: '',
-  class: '',
   description: '',
-  director: '',
-  image: '',
-  otitle: '',
   release_date: '',
   episodes: [],
-  score: '',
+  score: 0,  
   title: '',
-  bg: '',
 });
 
 const playConfigForm = reactive<VideoPlayConfig>({
@@ -184,7 +96,7 @@ const playConfigForm = reactive<VideoPlayConfig>({
   end_duration: 0,
 });
 
-const activeKey = ref('1');
+const activeKey = ref('2');
 
 const rules: Record<string, Rule[]> = {
   title: [{ required: true, message: '请输入名称' }],
@@ -235,44 +147,6 @@ function handleDeleteVideo() {
   }).then((resp: any) => {
     router.push('/');
   });
-}
-
-const imageLoading = ref(false);
-const bgLoading = ref(false);
-
-function saveToLocal(url: string, file_name: string, key: string) {
-  if (key === 'image') {
-    imageLoading.value = true;
-  }
-  if (key === 'bg') {
-    bgLoading.value = true;
-  }
-  invoke('handle_down_file', {
-    req: {
-      url: url,
-      path: String(form.id),
-      file_name: file_name,
-    },
-  })
-    .then((resp: any) => {
-      if (key === 'image') {
-        Object.assign(form, { image: convertFileSrc(resp.data) });
-      }
-      if (key === 'bg') {
-        Object.assign(form, { bg: convertFileSrc(resp.data) });
-      }
-    })
-    .catch((e) => {
-      console.log(e);
-    })
-    .finally(() => {
-      if (key === 'image') {
-        imageLoading.value = false;
-      }
-      if (key === 'bg') {
-        bgLoading.value = false;
-      }
-    });
 }
 
 let workPath = '';

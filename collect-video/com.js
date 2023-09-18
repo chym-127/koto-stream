@@ -1,4 +1,21 @@
+const seasonMapper = {
+    一: 1,
+    二: 2,
+    三: 3,
+    四: 4,
+    五: 5,
+    六: 6,
+};
+const seasonReg = /第.?季/g;
 (function (xhr) {
+    let season = 1
+    try {
+        let title = document.querySelector('meta[property="og:title"]').getAttribute("content")
+        let s = title.match(seasonReg)[0][1];
+        season = seasonMapper[s] || 1;
+    } catch (error) {
+        season = 1
+    }
     var XHR = XMLHttpRequest.prototype;
 
     var open = XHR.open;
@@ -27,9 +44,10 @@
                 if (myUrl.indexOf('.m3u8') !== -1 && myUrl.indexOf('hls') !== -1) {
                     let currentVod = document.querySelector("li[class='on']")
                     if (currentVod) {
+
                         window.currentVodUrl = myUrl
                         let index = getChildIndex(currentVod)
-                        saveCurrentVod(currentVod.innerText, myUrl, index)
+                        saveCurrentVod(currentVod.innerText, myUrl, index, season)
                         if (window.autoCollect) {
                             let nextNode = getChildByIndex(currentVod.parentNode, index + 1)
                             if (nextNode) {
@@ -100,6 +118,22 @@
     }
 })();
 
+
+function sendData(MOVS) {
+    let items = []
+    for (const key in MOVS) {
+        if (Object.hasOwnProperty.call(MOVS, key)) {
+            const item = MOVS[key];
+            items.push(item)
+        }
+    }
+    var xmlhttp = new XMLHttpRequest();
+    var url = 'http://127.0.0.1:8080/import/media';
+    xmlhttp.open("POST", url);
+    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlhttp.send(JSON.stringify({ medias: items }));
+}
+
 function startNext(node) {
     node.click()
     let el = document.querySelector("dt[class='on']")
@@ -111,9 +145,10 @@ function startNext(node) {
 }
 
 
-window.saveCurrentVod = (title, url, index) => {
+window.saveCurrentVod = (title, url, index, season) => {
     window.episodes[index] = {
         title: title,
+        season: season,
         url: url,
         index: index + 1
     }
@@ -152,7 +187,7 @@ function getVideoInfoFromCom(MOVS) {
                         obj[key] = content
                     }
                     if (key === 'release_date') {
-                        obj['releaseDate'] = Number(content)
+                        obj['release_date'] = Number(content)
                     }
                 }
             }

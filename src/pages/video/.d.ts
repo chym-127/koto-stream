@@ -1,19 +1,15 @@
 interface VideoInfo {
     id: number,
     title: string,
-    actor?: string,
-    alias?: string,
+    poster_url?: string,
+    fanart_url?: string,
+    type?: number,
     area?: string,
-    class?: string,
     description?: string,
-    director?: string,
-    image?: string,
-    otitle?: string,
     release_date?: string,
     episodes?: Episode[],
     expand?: VideoPlayConfig,
-    score?: string,
-    bg?: string,
+    score?: number,
 }
 
 interface VideoPlayConfig {
@@ -28,4 +24,5 @@ interface Episode {
     title: string,
     url: string,
     file_path: string,
+    season: number,
 }

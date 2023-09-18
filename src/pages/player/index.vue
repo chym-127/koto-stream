@@ -178,12 +178,7 @@ const playVideo = (e: Episode, index: number) => {
   progressState = 0;
   currentEpisode = e;
   currentIndex.value = index;
-  if (currentEpisode.file_path) {
-    url.value = convertFileSrc(currentEpisode.file_path);
-    videoInstance.src = url.value;
-  } else {
-    hls!.loadSource(currentEpisode.url);
-  }
+  hls!.loadSource(currentEpisode.url);
   if (videoPlayConfig?.start_duration) {
     videoInstance.currentTime = videoPlayConfig!.start_duration;
   }

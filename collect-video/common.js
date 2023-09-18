@@ -36,15 +36,17 @@ async function getM3u8UrlByUrl(url) {
 
 
 function sendData(MOVS) {
+    let items = []
     for (const key in MOVS) {
         if (Object.hasOwnProperty.call(MOVS, key)) {
             const item = MOVS[key];
-            var xmlhttp = new XMLHttpRequest();
-            var url = 'http://127.0.0.1:8080/import/media';
-            xmlhttp.open("POST", url);
-            xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xmlhttp.send(JSON.stringify({medias:[item]}));
+            items.push(item)
         }
     }
+    var xmlhttp = new XMLHttpRequest();
+    var url = 'http://127.0.0.1:8080/import/media';
+    xmlhttp.open("POST", url);
+    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlhttp.send(JSON.stringify({ medias: items }));
 }
 

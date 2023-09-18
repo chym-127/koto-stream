@@ -1,9 +1,9 @@
 <template>
   <div class="full" style="position: relative">
-    <div class="bg full" v-if="video.bg" :style="{ backgroundImage: 'url(' + video.bg + ')' }"></div>
+    <div class="bg full" v-if="video.fanart_url" :style="{ backgroundImage: 'url(' + video.fanart_url + ')' }"></div>
     <div class="bg full" v-else :style="{ backgroundImage: 'url(' + defaultBg + ')' }"></div>
     <div class="mask full"></div>
-    <div class="flex-row info-box" style="padding: 20px 40px 30px 40px">
+    <div class="flex-row info-box" style="padding: 30px 40px 30px 40px">
       <div class="left flex-1">
         <div class="ellips-1">
           <span class="title">{{ video.title }}</span>
@@ -11,15 +11,7 @@
         </div>
         <div class="c-fff font-16-400">
           <a-rate :count="1" v-model:value="value" />
-          <span class="ml-4">{{ video.score }}/10</span>
-        </div>
-        <div class="ellips-3 font-14-400 c-c9c9c mt-12">
-          <span class="c-999">导演：</span>
-          <span>{{ video.director }}</span>
-        </div>
-        <div class="ellips-1 font-14-400 c-c9c9c mt-12">
-          <span class="c-999">主演：</span>
-          <span>{{ video.actor }}</span>
+          <span class="ml-4">{{ video.score!.toFixed(1) }}/10</span>
         </div>
         <div class="desc ellips-8 font-14-400 c-c9c9c mt-12">
           <span class="c-999">剧情简介：</span>
@@ -31,7 +23,7 @@
       <div class="right">
         <div class="pic">
           <div class="mask1"></div>
-          <img :src="video.image" alt="" srcset="" />
+          <img :src="video.poster_url" alt="" srcset="" />
         </div>
       </div>
     </div>
@@ -50,14 +42,11 @@
       :info="video"
       @update="updateSetting"
     ></Setting>
-
-    <Download2MediaHub :style="{ position: 'absolute' }" v-model:visible="mediaHubVisible" :info="video"></Download2MediaHub>
   </div>
 </template>
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
 import { onUnmounted, onMounted, reactive, ref } from 'vue';
-import { invoke } from '@tauri-apps/api/tauri';
 import { message } from 'ant-design-vue';
 import defaultBg from '../../assets/image/bg.webp';
 import Setting from './Setting.vue';
@@ -66,14 +55,17 @@ import store from '../../utils/store';
 import eventBus, { EventMsg } from '../../utils/event_bus';
 import TipsConfirm from '../../utils/tips_confirm';
 import playHistory, { RecentEpisodRecord } from './history';
+import { getMediaByID } from '../../api';
 
 const settingVisible = ref<boolean>(false);
-const mediaHubVisible = ref<boolean>(true);
 
 const route = useRoute();
 const router = useRouter();
 const value = ref(1);
-const video = reactive<any>({});
+const video = reactive<VideoInfo>({
+  id: 0,
+  title: '',
+});
 const setting = ref<InstanceType<typeof Setting> | null>(null);
 
 const showSetting = () => {
@@ -83,10 +75,6 @@ const showSetting = () => {
   }
 };
 
-const showMediaHub = () => {
-  mediaHubVisible.value = !mediaHubVisible.value;
-};
-
 const id = route.query.id || null;
 let lastRecent: RecentEpisodRecord | null = null;
 
@@ -94,19 +82,8 @@ if (id) {
   handleGetVideo();
 }
 function handleGetVideo() {
-  invoke('handle_get_video', {
-    id: Number(id),
-  }).then((resp: any) => {
+  getMediaByID({ id: Number(id) }).then((resp: any) => {
     Object.assign(video, resp.data);
-    video.episodes = JSON.parse(video.episodes);
-    video.expand = video.expand ? JSON.parse(video.expand) : {};
-    video.episodes.forEach(async (episode: Episode) => {
-      let file_path = video.id + '\\' + episode.index + '.mp4';
-      let resp: any = await invoke('handle_exists_file', { path: file_path });
-      if (resp.data.exists) {
-        episode.file_path = resp.data.path;
-      }
-    });
 
     lastRecent = playHistory.getRecentEpisod(Number(id));
     if (lastRecent) {
@@ -145,11 +122,6 @@ let menus = [
     id: 'DONWLOAD',
     name: '编辑视频',
     clickFunc: showSetting,
-  },
-  {
-    id: 'TOMEDIAHUB',
-    name: '保存到媒体库',
-    clickFunc: showMediaHub,
   },
 ];
 
@@ -210,9 +182,9 @@ onUnmounted(() => {
     90deg,
     rgba(1, 1, 1, 1),
     rgba(1, 1, 1, 0.9),
+    rgba(1, 1, 1, 0.9),
     rgba(1, 1, 1, 0.8),
-    rgba(1, 1, 1, 0.7),
-    rgba(1, 1, 1, 0.4),
+    rgba(1, 1, 1, 0.8),
     rgba(1, 1, 1, 0),
     rgba(1, 1, 1, 0)
   );
@@ -253,8 +225,9 @@ onUnmounted(() => {
     height: auto;
 
     .pic {
-      width: 240px;
-      height: 350px;
+      border: 1px solid #fff;
+      width: 242px;
+      height: 352px;
       position: relative;
       border-radius: 8px;
 

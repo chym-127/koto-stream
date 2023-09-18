@@ -2,7 +2,7 @@
   <div class="full vod-list container">
     <div class="vod-item" v-for="(item, index) in items" :key="index" @click="jumpToDetails(item)">
       <div class="pic">
-        <img :src="item.image" alt="" srcset="" />
+        <img :src="item.poster_url" alt="" srcset="" />
       </div>
       <div class="info mt-4 c-000 ellips-2" style="word-break: break-all">
         <span class="font-14-600">{{ item.title }}</span>
@@ -15,24 +15,16 @@
 import { useRouter } from 'vue-router';
 import { invoke } from '@tauri-apps/api/tauri';
 import { reactive } from 'vue';
-
+import { listMedia } from '../../api/index';
 const router = useRouter();
 let items = reactive<any>([]);
 function handleListVideo() {
-  invoke('handle_list_video', {
-    req: {
-      page_size: 99999,
-      page_num: 1,
-    },
-  }).then((resp: any) => {
-    items.splice(0);
-    resp.data.forEach((item: any) => {
-      item.episodes = JSON.parse(item.episodes);
-    });
-    Object.assign(items, resp.data);
+  items.splice(0)
+  listMedia({}).then((resp) => {
+    console.log(resp);
+    Object.assign(items,resp.data)
   });
 }
-
 
 function jumpToDetails(row: any) {
   router.push({
@@ -44,7 +36,6 @@ function jumpToDetails(row: any) {
 }
 
 handleListVideo();
-
 </script>
 
 <style lang="less" scoped>
