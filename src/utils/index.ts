@@ -81,8 +81,8 @@ const formatSeconds = (seconds: number, format: string = 'HHMMSS') => {
 
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 
-function getMediaLocalResouce(v: VideoInfo, fileName: string) { 
-  let workPath = "E:\\media\\" + (v.type === 1 ? 'movies' : 'tvs') + `\\${v.title}(${v.release_date})\\` + fileName
+function getMediaLocalResouce(v: VideoInfo, fileName: string) {
+  let workPath = "E:\\media\\" + (v.type === 1 ? 'movies' : 'tvs') + `\\${v.title}(${v.release_date})\\` + (v.type === 1 ? v.title+'-' : '') + fileName
   return convertFileSrc(workPath)
 }
 
