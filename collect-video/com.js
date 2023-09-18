@@ -152,7 +152,7 @@ function getVideoInfoFromCom(MOVS) {
                         obj[key] = content
                     }
                     if (key === 'release_date') {
-                        obj['releaseDate'] = content
+                        obj['releaseDate'] = Number(content)
                     }
                 }
             }

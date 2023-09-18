@@ -7,8 +7,11 @@ window.saveVod = function () {
     }
     MOVS = getVideoInfoFromClub(MOVS)
 
-    sendData(MOVS)
+    // sendData(MOVS)
     localStorage.setItem("MOVS", JSON.stringify(MOVS))
+
+    localStorage.setItem("EPISODES", "")
+    localStorage.setItem("CURRENT_INDEX", "")
 }
 
 function sendData(MOVS) {
@@ -19,7 +22,7 @@ function sendData(MOVS) {
             var url = 'http://127.0.0.1:8080/import/media';
             xmlhttp.open("POST", url);
             xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xmlhttp.send(JSON.stringify({medias:[item]}));
+            xmlhttp.send(JSON.stringify({ medias: [item] }));
         }
     }
 }
@@ -38,7 +41,7 @@ function getVideoInfoFromClub(MOVS) {
 
         let titleDom = document.getElementsByClassName("product-title")[0]
         obj.title = titleDom.firstChild.textContent
-        obj.release_date = titleDom.querySelector('span:nth-child(1)').textContent.slice(1, -1)
+        obj.release_date = Number(titleDom.querySelector('span:nth-child(1)').textContent.slice(1, -1))
         // obj.score = titleDom.getElementsByClassName('rate')[0].innerText
 
         // let arrDom = document.getElementsByClassName('product-excerpt')
@@ -59,8 +62,15 @@ function getVideoInfoFromClub(MOVS) {
 
     return MOVS
 }
-
-
+const seasonMapper = {
+    一: 1,
+    二: 2,
+    三: 3,
+    四: 4,
+    五: 5,
+    六: 6,
+};
+const seasonReg = /第.?季/g;
 (async function () {
     window.autoCollect = localStorage.getItem('AUTO_COLLECT') || false
     let reg = /https:.*.m3u8/g
@@ -70,12 +80,22 @@ function getVideoInfoFromClub(MOVS) {
         let src = el.getAttribute('src')
         let found = src.match(reg)
         let currentVod = document.querySelector("li[class='on']")
+        let titleDom = document.getElementsByClassName("product-title")[0]
+        let title = titleDom.firstChild.textContent
+        let season = 1
         if (currentVod) {
             let index = getChildIndex(currentVod)
             let CURRENT_INDEX = localStorage.getItem("CURRENT_INDEX") || -1
             if (found) {
                 localStorage.setItem("CURRENT_INDEX", index)
+                try {
+                    let s = title.match(seasonReg)[0][1];
+                    season = seasonMapper[s] || 1;
+                } catch (error) {
+                    season = 1
+                }
                 window.episodes[index] = {
+                    season: Number(season),
                     title: currentVod.innerText,
                     url: await getM3u8UrlByUrl(found[0]),
                     index: index + 1
@@ -104,7 +124,6 @@ function playNextVideo(nextNode) {
 
 
 (function () {
-    window.episodes = {}
     let el = document.createElement("button")
     el.innerText = "发送数据"
     el.style.position = "fixed"
@@ -129,7 +148,6 @@ function playNextVideo(nextNode) {
     el.style.right = "20px"
     el.style.zIndex = 999999
     el.addEventListener("click", e => {
-        localStorage.setItem("EPISODES", '')
         let currentVod = document.querySelector("li[class='on']")
         if (currentVod) {
             localStorage.setItem('AUTO_COLLECT', "true")
