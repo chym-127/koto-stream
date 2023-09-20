@@ -62,7 +62,7 @@ import { getMediaLocalResouce } from '../../utils/index';
 import eventBus, { EventMsg } from '../../utils/event_bus';
 import TipsConfirm from '../../utils/tips_confirm';
 import playHistory, { RecentEpisodRecord } from './history';
-import { getMediaByID } from '../../api';
+import { downMediaByID, getMediaByID } from '../../api';
 
 const settingVisible = ref<boolean>(false);
 
@@ -135,11 +135,22 @@ const setMenu = (menus: any) => {
   eventBus.publicize(msg);
 };
 
+const downloadAll = () => {
+  downMediaByID({ id: video.id }).then((resp: any) => {
+    console.log(resp);
+  });
+};
+
 let menus = [
   {
-    id: 'DONWLOAD',
+    id: 'UPDATE',
     name: '编辑视频',
     clickFunc: showSetting,
+  },
+  {
+    id: 'DONWLOAD',
+    name: '下载',
+    clickFunc: downloadAll,
   },
 ];
 

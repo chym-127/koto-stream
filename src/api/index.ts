@@ -36,4 +36,12 @@ const getMediaByID = (data: any) => {
 }
 
 
-export { listMedia,getMediaByID }
+const downMediaByID = (data: any) => {
+    return instance.post('down/media', data)
+}
+
+const listDownTask = (data: any = {}) => {
+    return instance.post('list/task', data)
+}
+
+export { listMedia, getMediaByID, downMediaByID, listDownTask }

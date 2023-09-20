@@ -11,23 +11,17 @@
     @close="onClose"
   >
     <div style="padding: 0">
-      <a-button type="primary" @click="stopDown">停止</a-button>
-      <a-table :columns="columns" :data-source="cloneDeep(taskList)" bordered>
+      <a-table :columns="columns" :data-source="taskList" bordered rowKey="id">
         <template #bodyCell="{ column, text, record }: any">
           <template v-if="column.dataIndex === 'name'">
             <span>{{ text }}</span>
           </template>
-          <template v-if="column.dataIndex === 'progress'">
-            <span v-if="text !== 'file..'">{{ text || 0 }}%</span>
-            <span v-else>100%</span>
+          <template v-if="column.dataIndex === 'episodeCount'">
+            <span>{{ record.downloadCount }}/{{ record.episodeCount }}</span>
           </template>
 
-          <template v-if="column.dataIndex === 'totalDuration'">
-            <span>{{ text || '-' }}</span>
-          </template>
-
-          <template v-if="column.dataIndex === 'leftTime'">
-            <span>{{ text || '-' }}</span>
+          <template v-if="column.dataIndex === 'type'">
+            <span>{{ typeMapper[text] }}</span>
           </template>
         </template>
       </a-table>
@@ -38,9 +32,14 @@
 <script setup lang="ts">
 import { onUnmounted, reactive, ref } from 'vue';
 import m3u8Downloader, { M3u8DownTask } from '../../../utils/m3u8_helper';
-import cloneDeep from 'lodash.clonedeep';
 import eventBus from '../../../utils/event_bus';
+import { listDownTask } from '../../../api';
 const visible = ref(false);
+const typeMapper: any = {
+  1: '队列中',
+  2: '下载中',
+  3: '下载完成',
+};
 const onClose = () => {
   visible.value = false;
 };
@@ -54,10 +53,6 @@ const menuClickCallback = function (data: any) {
   }
 };
 
-const stopDown = () => {
-  m3u8Downloader.killAllTask();
-};
-
 eventBus.on('menu-click', menuClickCallback);
 
 const taskList = reactive<M3u8DownTask[]>([]);
@@ -65,39 +60,38 @@ const columns = [
   {
     title: '标题',
     width: 240,
-    dataIndex: 'name',
+    dataIndex: 'title',
   },
   {
     title: '进度',
-    dataIndex: 'progress',
-  },
-  {
-    title: '视频时长',
-    width: 120,
-    dataIndex: 'totalDuration',
-  },
-  {
-    title: '剩余下载时间',
-    width: 120,
-    dataIndex: 'leftTime',
+    dataIndex: 'episodeCount',
   },
   {
     title: '状态',
     width: 120,
-    dataIndex: 'state',
+    dataIndex: 'type',
   },
 ];
 
 onUnmounted(() => {
   eventBus.off('menu-click', menuClickCallback);
   m3u8Downloader.destroy();
-  clearInterval(p);
 });
 
-let p = setInterval(() => {
-  taskList.splice(0);
-  Object.assign(taskList, m3u8Downloader.getAllTask());
-}, 100);
+handleListTask();
+
+function handleListTask() {
+  listDownTask()
+  .then((resp: any) => {
+      taskList.splice(0);
+      Object.assign(taskList, resp.data);
+    })
+    .finally(() => {
+      // setTimeout(() => {
+      //   handleListTask();
+      // }, 5000);
+    });
+}
 </script>
 
 <style lang="less" scoped></style>
