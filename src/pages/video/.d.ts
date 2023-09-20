@@ -22,6 +22,8 @@ interface VideoPlayConfig {
 interface Episode {
     index: number,
     title: string,
+    description?: string,
+    release_date?: string,
     url: string,
     file_path: string,
     season: number,

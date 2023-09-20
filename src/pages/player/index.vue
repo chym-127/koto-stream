@@ -18,7 +18,7 @@
     </div>
     <div class="video-name">
       <!-- <span>{{ currentVideo.title }}-{{ currentEpisode?.title }}</span> -->
-      <img :src="logoUrl" @error="" alt="" srcset="" style="height: 20px;">
+      <img :src="logoUrl" @error="" alt="" srcset="" style="height: 40px;">
     </div>
     <video
       id="videoInstance"

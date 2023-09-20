@@ -1,7 +1,7 @@
 <template>
   <div class="full" style="position: relative">
     <div class="bg full" v-if="video.fanart_url">
-      <img :src="bgPath" alt="" srcset="" style="width: 100%;height: 100%;">
+      <img :src="bgPath" alt="" srcset="" style="width: 100%; height: 100%" />
     </div>
     <div class="bg full" v-else :style="{ backgroundImage: 'url(' + defaultBg + ')' }"></div>
     <div class="mask full"></div>
@@ -11,9 +11,9 @@
           <span class="title">{{ video.title }}</span>
           <span class="ml-16 font-28-600" style="color: #c6c6c6">({{ video.release_date }})</span>
         </div>
-        <div class="c-fff font-16-400">
+        <div class="c-fff font-16-400" v-if="video.score">
           <a-rate :count="1" v-model:value="value" />
-          <span class="ml-4" v-if="video.score">{{ video.score!.toFixed(1) }}/10</span>
+          <span class="ml-4">{{ video.score!.toFixed(1) }}/10</span>
         </div>
         <div class="desc ellips-8 font-14-400 c-c9c9c mt-12">
           <span class="c-999">剧情简介：</span>
@@ -31,9 +31,14 @@
     </div>
     <div style="padding: 0 40px 20px 40px; overflow: auto; height: 150px">
       <div class="episodes flex-row">
-        <div class="episode-item" v-for="(item, index) in video.episodes" @click="playVideo(index)">
-          <span class="font-14-400 c-000">{{ item.title }}</span>
-        </div>
+        <template v-for="(item, index) in video.episodes">
+          <a-tooltip :mouseEnterDelay="0.3">
+            <template #title>{{ item.description || '暂无简介' }}</template>
+            <div class="episode-item" @click="playVideo(index)">
+              <span class="font-14-400 c-000">第{{ item.index }}集</span>
+            </div>
+          </a-tooltip>
+        </template>
       </div>
     </div>
 
@@ -89,7 +94,15 @@ function handleGetVideo() {
   getMediaByID({ id: Number(id) }).then((resp: any) => {
     Object.assign(video, resp.data);
     bgPath.value = getMediaLocalResouce(video, 'fanart.jpg');
-    
+    if (video.episodes && video.episodes.length) {
+      video.episodes!.forEach((episode) => {
+        episode.description = episode.description?.replace(/ /g, '+').replace(/\n/g, '');
+        if (episode.description && episode.description.length >= 256) {
+          episode.description = episode.description.slice(0, 256) + '...';
+        }
+      });
+    }
+
     lastRecent = playHistory.getRecentEpisod(Number(id));
     if (lastRecent) {
       historyTips.newTipConfirm(`检测到上次播放到第${lastRecent.index}集，是否继续播放`, -1);
