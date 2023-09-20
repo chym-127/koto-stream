@@ -128,7 +128,7 @@ function sendData(MOVS) {
         }
     }
     var xmlhttp = new XMLHttpRequest();
-    var url = 'http://127.0.0.1:8080/import/media';
+    var url = 'http://localhost:8080/import/media';
     xmlhttp.open("POST", url);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlhttp.send(JSON.stringify({ medias: items }));

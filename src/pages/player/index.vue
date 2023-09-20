@@ -17,7 +17,8 @@
       </div>
     </div>
     <div class="video-name">
-      <span>{{ currentVideo.title }}-{{ currentEpisode?.title }}</span>
+      <!-- <span>{{ currentVideo.title }}-{{ currentEpisode?.title }}</span> -->
+      <img :src="logoUrl" @error="" alt="" srcset="" style="height: 20px;">
     </div>
     <video
       id="videoInstance"
@@ -49,6 +50,7 @@ import playHistory from '../video/history';
 import appConfig from '../../utils/config';
 import windowHelper, { WindowSize } from '../../utils/window_helper';
 import TipsConfirm from '../../utils/tips_confirm';
+import { getMediaLocalResouce } from '../../utils';
 
 const url = ref('');
 const totalDuration = ref(0);
@@ -56,6 +58,7 @@ const totalDuration = ref(0);
 const route = useRoute();
 const currentVideo = reactive<VideoInfo>(store.get('CURRENT_VIDEO'));
 
+let logoUrl = getMediaLocalResouce(currentVideo, 'logo.png')
 let currentEpisode: Episode | undefined;
 let videoPlayConfig: VideoPlayConfig | undefined;
 
@@ -393,8 +396,8 @@ const clickHistoryTips = (second: number) => {
 
 .video-name {
   position: absolute;
-  top: 0px;
-  right: 4px;
+  top: 2px;
+  left: 4px;
   opacity: 0.3s;
   font-size: 6px;
   color: #ffffff33;
