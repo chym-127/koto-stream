@@ -1,5 +1,4 @@
 import { message } from 'ant-design-vue';
-
 interface Resp {
   data: [];
   message: string;
@@ -80,9 +79,14 @@ const formatSeconds = (seconds: number, format: string = 'HHMMSS') => {
 };
 
 import { convertFileSrc } from '@tauri-apps/api/tauri';
+import { settingStore } from './store';
 
 function getMediaLocalResouce(v: VideoInfo, fileName: string) {
-  let workPath = "E:\\media\\" + (v.type === 1 ? 'movies' : 'tvs') + `\\${v.title}(${v.release_date})\\` + (v.type === 1 ? v.title+'-' : '') + fileName
+  let media_path = settingStore.get("media_path") || ""
+  if (!media_path) {
+    return ""
+  }
+  let workPath = media_path + "\\" + (v.type === 1 ? 'movies' : 'tvs') + `\\${v.title}(${v.release_date})\\` + (v.type === 1 ? v.title + '-' : '') + fileName
   return convertFileSrc(workPath)
 }
 

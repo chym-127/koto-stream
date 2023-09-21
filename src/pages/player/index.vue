@@ -36,25 +36,20 @@
 </template>
 
 <script setup lang="ts">
-import { LogicalSize, appWindow } from '@tauri-apps/api/window';
-import { convertFileSrc, invoke } from '@tauri-apps/api/tauri';
+import { appWindow } from '@tauri-apps/api/window';
 import { onMounted, onUnmounted, reactive, ref } from 'vue';
 import { register, unregisterAll } from '@tauri-apps/api/globalShortcut';
 import { useRoute } from 'vue-router';
 import Hls from 'hls.js';
 import eventBus, { EventMsg } from '../../utils/event_bus';
-import m3u8Downloader, { M3u8DownTask } from '../../utils/m3u8_helper';
 import store from '../../utils/store';
-import { message } from 'ant-design-vue';
 import playHistory from '../video/history';
 import appConfig from '../../utils/config';
 import windowHelper, { WindowSize } from '../../utils/window_helper';
 import TipsConfirm from '../../utils/tips_confirm';
 import { getMediaLocalResouce } from '../../utils';
 
-const url = ref('');
 const totalDuration = ref(0);
-
 const route = useRoute();
 const currentVideo = reactive<VideoInfo>(store.get('CURRENT_VIDEO'));
 
@@ -90,13 +85,6 @@ const toggleMenuBar = (visible: boolean) => {
   eventBus.publicize(msg);
 };
 
-const downloadToLocal = () => {
-  if (!currentEpisode?.file_path) {
-    onDown(currentEpisode!);
-  } else {
-    message.warning('当前视频已下载到本地');
-  }
-};
 
 const playListModalVisible = ref(false);
 const togglePlayListModal = () => {
@@ -104,32 +92,13 @@ const togglePlayListModal = () => {
 };
 let menus = [
   {
-    id: 'DONWLOAD',
-    name: '下载到本地',
-    clickFunc: downloadToLocal,
-  },
-  {
     id: 'PLAY_LIST',
     name: '播放列表',
     clickFunc: togglePlayListModal,
   },
 ];
 
-let workPath = '';
-invoke('handle_get_work_path', {}).then((resp: any) => {
-  workPath = resp.data;
-  setMenu(menus);
-});
-const onDown = (e: Episode) => {
-  let task: M3u8DownTask = {
-    uuid: currentVideo.id + '-' + e.index,
-    name: currentVideo.title + '-' + e.title,
-    url: e.url,
-    workPath: workPath + '\\' + currentVideo.id,
-    outputFilePath: workPath + '\\' + currentVideo.id + '\\' + e.index + '.mp4',
-  };
-  m3u8Downloader.submitTask(task);
-};
+setMenu(menus);
 
 onUnmounted(() => {
   setMenu([]);
@@ -181,7 +150,21 @@ const playVideo = (e: Episode, index: number) => {
   progressState = 0;
   currentEpisode = e;
   currentIndex.value = index;
-  hls!.loadSource(currentEpisode.url);
+  let localPath = ''
+  if (currentEpisode.local_path) {
+    if (currentVideo.type == 2) {
+      localPath = `Season-${currentEpisode.season}\\${currentEpisode.local_path}`
+      localPath = getMediaLocalResouce(currentVideo,localPath)
+    }else{
+      localPath = getMediaLocalResouce(currentVideo,currentEpisode.local_path)
+    }
+  }
+  if (localPath) {
+    videoInstance.src = localPath
+  }else{
+    hls!.loadSource(currentEpisode.url);
+  }
+
   if (videoPlayConfig?.start_duration) {
     videoInstance.currentTime = videoPlayConfig!.start_duration;
   }

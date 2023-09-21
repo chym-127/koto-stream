@@ -25,6 +25,6 @@ interface Episode {
     description?: string,
     release_date?: string,
     url: string,
-    file_path: string,
+    local_path: string,
     season: number,
 }

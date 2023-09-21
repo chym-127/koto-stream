@@ -71,10 +71,10 @@ const menus = reactive<Menu[]>([
     id: 'DOWNLOAD_CENTER',
     name: '下载中心',
   },
-  {
-    id: 'IMPORT_VIDEO',
-    name: '导入视频',
-  },
+  // {
+  //   id: 'IMPORT_VIDEO',
+  //   name: '导入视频',
+  // },
   {
     id: 'SETTING',
     name: '设置',
