@@ -16,8 +16,12 @@
           <template v-if="column.dataIndex === 'name'">
             <span>{{ text }}</span>
           </template>
-          <template v-if="column.dataIndex === 'episodeCount'">
-            <span>{{ record.downloadCount }}/{{ record.episodeCount }}</span>
+          <template v-if="column.dataIndex === 'episode_count'">
+            <span>{{ record.download_count }}{{ '/' }}{{ record.episode_count }}</span>
+          </template>
+
+          <template v-if="column.dataIndex === 'success_count'">
+            <span>{{ record.success_count }}/{{ record.failed_count }}</span>
           </template>
 
           <template v-if="column.dataIndex === 'type'">
@@ -64,7 +68,11 @@ const columns = [
   },
   {
     title: '进度',
-    dataIndex: 'episodeCount',
+    dataIndex: 'episode_count',
+  },
+  {
+    title: '成功/失败',
+    dataIndex: 'success_count',
   },
   {
     title: '状态',
@@ -82,14 +90,14 @@ handleListTask();
 
 function handleListTask() {
   listDownTask()
-  .then((resp: any) => {
+    .then((resp: any) => {
       taskList.splice(0);
       Object.assign(taskList, resp.data);
     })
     .finally(() => {
-      // setTimeout(() => {
-      //   handleListTask();
-      // }, 5000);
+      setTimeout(() => {
+        handleListTask();
+      }, 5000);
     });
 }
 </script>

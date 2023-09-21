@@ -137,7 +137,7 @@ const setMenu = (menus: any) => {
 
 const downloadAll = () => {
   downMediaByID({ id: video.id }).then((resp: any) => {
-    console.log(resp);
+    message.success("已加入下载队列")
   });
 };
 

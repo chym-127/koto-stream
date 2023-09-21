@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { message } from 'ant-design-vue';
 
 
 const instance = axios.create({
@@ -20,6 +21,10 @@ instance.interceptors.request.use(function (config) {
 instance.interceptors.response.use(function (response) {
     // Any status code that lie within the range of 2xx cause this function to trigger
     // Do something with response data
+    if (response.data.code !== 200) {
+        message.warning(response.data.message)
+        return Promise.reject(response.data);
+    }
     return response.data;
 }, function (error) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
