@@ -7,18 +7,23 @@
       @click="togglePlayListModal"
     ></div>
 
-    <div class="episode-list" :class="playListModalVisible ? 'show' : 'hide'">
+    <div class="episode-list mt-24" :class="playListModalVisible ? 'show' : 'hide'">
       <div class="flex-row" style="flex-wrap: wrap">
-        <div class="episode-item" v-for="(e, index) in currentVideo.episodes" @click="playVideo(e, index)">
-          <div class="card-box" :class="index === currentIndex ? 'active' : null">
-            <span class="c-fff">{{ e.index }}</span>
-          </div>
-        </div>
+        <template v-for="(item, index) in currentVideo.episodes">
+          <a-tooltip :mouseEnterDelay="0.8">
+            <template #title>{{ item.description || '暂无简介' }}</template>
+            <div class="episode-item" @click="playVideo(item, index)">
+              <div class="card-box" :class="index === currentIndex ? 'active' : null">
+                <span class="c-fff">{{ item.index }}</span>
+              </div>
+            </div>
+          </a-tooltip>
+        </template>
       </div>
     </div>
     <div class="video-name">
       <!-- <span>{{ currentVideo.title }}-{{ currentEpisode?.title }}</span> -->
-      <img :src="logoUrl" @error="" alt="" srcset="" style="height: 40px;">
+      <img :src="logoUrl" @error="" alt="" srcset="" style="height: 40px" />
     </div>
     <video
       id="videoInstance"
@@ -53,7 +58,7 @@ const totalDuration = ref(0);
 const route = useRoute();
 const currentVideo = reactive<VideoInfo>(store.get('CURRENT_VIDEO'));
 
-let logoUrl = getMediaLocalResouce(currentVideo, 'logo.png')
+let logoUrl = getMediaLocalResouce(currentVideo, 'logo.png');
 let currentEpisode: Episode | undefined;
 let videoPlayConfig: VideoPlayConfig | undefined;
 
@@ -84,7 +89,6 @@ const toggleMenuBar = (visible: boolean) => {
   };
   eventBus.publicize(msg);
 };
-
 
 const playListModalVisible = ref(false);
 const togglePlayListModal = () => {
@@ -150,18 +154,18 @@ const playVideo = (e: Episode, index: number) => {
   progressState = 0;
   currentEpisode = e;
   currentIndex.value = index;
-  let localPath = ''
+  let localPath = '';
   if (currentEpisode.local_path) {
     if (currentVideo.type == 2) {
-      localPath = `Season-${currentEpisode.season}\\${currentEpisode.local_path}`
-      localPath = getMediaLocalResouce(currentVideo,localPath)
-    }else{
-      localPath = getMediaLocalResouce(currentVideo,currentEpisode.local_path)
+      localPath = `Season-${currentEpisode.season}\\${currentEpisode.local_path}`;
+      localPath = getMediaLocalResouce(currentVideo, localPath);
+    } else {
+      localPath = getMediaLocalResouce(currentVideo, currentEpisode.local_path, false);
     }
   }
   if (localPath) {
-    videoInstance.src = localPath
-  }else{
+    videoInstance.src = localPath;
+  } else {
     hls!.loadSource(currentEpisode.url);
   }
 
