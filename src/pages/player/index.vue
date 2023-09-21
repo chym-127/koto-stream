@@ -11,7 +11,7 @@
       <div class="flex-row" style="flex-wrap: wrap">
         <div class="episode-item" v-for="(e, index) in currentVideo.episodes" @click="playVideo(e, index)">
           <div class="card-box" :class="index === currentIndex ? 'active' : null">
-            <span class="c-fff">{{ e.title }}</span>
+            <span class="c-fff">{{ e.index }}</span>
           </div>
         </div>
       </div>

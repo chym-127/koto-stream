@@ -1,11 +1,18 @@
 <template>
-  <div class="full vod-list container">
-    <div class="vod-item" v-for="(item, index) in items" :key="index" @click="jumpToDetails(item)">
-      <div class="pic">
-        <img :src="item.poster_url" alt="" srcset="" />
-      </div>
-      <div class="info mt-4 c-000 ellips-2" style="word-break: break-all">
-        <span class="font-14-600">{{ item.title }}</span>
+  <div style="position: relative">
+    <div class="full vod-list container" style="z-index: 2; position: relative">
+      <div
+        class="vod-item"
+        v-for="(item, index) in items"
+        :key="index"
+        @click="jumpToDetails(item)"
+      >
+        <div class="pic">
+          <img :src="item.poster_url" alt="" srcset="" />
+        </div>
+        <div class="info mt-4 c-000 ellips-2" style="word-break: break-all">
+          <span class="font-14-600">{{ item.title }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -13,16 +20,23 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { invoke } from '@tauri-apps/api/tauri';
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { listMedia } from '../../api/index';
+import { getMediaLocalResouce } from '../../utils';
 const router = useRouter();
-let items = reactive<any>([]);
+let items = reactive<VideoInfo[]>([]);
+let currentPoster = ref('');
+
 function handleListVideo() {
-  items.splice(0)
+  items.splice(0);
   listMedia({}).then((resp) => {
-    console.log(resp);
-    Object.assign(items,resp.data)
+    Object.assign(items, resp.data);
+    for (let index = 0; index < items.length; index++) {
+      const video = items[index];
+      if (video.poster_url) {
+        video.poster_url = getMediaLocalResouce(video, 'poster.jpg');
+      }
+    }
   });
 }
 
@@ -35,6 +49,14 @@ function jumpToDetails(row: any) {
   });
 }
 
+function mouseenter(event: any, item: VideoInfo) {
+  let localUrl = getMediaLocalResouce(item, 'fanart.jpg');
+  if (localUrl) {
+    currentPoster.value = localUrl;
+  }
+}
+
+function mouseleave(event: any, item: VideoInfo) {}
 handleListVideo();
 </script>
 
@@ -61,7 +83,7 @@ handleListVideo();
 .container {
   overflow: auto;
   display: flex;
-  background-color: #fff;
+  background-color: transparent;
   flex-wrap: wrap;
   padding: 10px 10px;
 }

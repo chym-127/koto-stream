@@ -19,19 +19,19 @@
           <a-table :columns="columns" :data-source="form.episodes" bordered>
             <template #bodyCell="{ column, text, record }: any">
               <template v-if="column.dataIndex === 'title'">
-                <a-input v-model:value="record.title" placeholder="请输入名称" />
+                <a-input v-model:value="record.title" disabled placeholder="请输入名称" />
               </template>
               <template v-if="column.dataIndex === 'url'">
                 <a-input v-model:value="record.url" placeholder="请输入url" />
               </template>
 
-              <template v-if="column.dataIndex === 'file_path'">
+              <template v-if="column.dataIndex === 'local_path'">
                 <span>{{ text ? '已下载' : '未下载' }}</span>
               </template>
 
-              <template v-if="column.dataIndex === 'action'">
+              <!-- <template v-if="column.dataIndex === 'action'">
                 <a-button type="link" @click="onDown(record)">{{ record.file_path ? '重新下载' : '下载' }}</a-button>
-              </template>
+              </template> -->
             </template>
           </a-table>
         </div>
@@ -72,7 +72,6 @@ import { reactive, ref } from 'vue';
 import { Form } from 'ant-design-vue';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import type { Rule } from 'ant-design-vue/es/form';
-import m3u8Downloader, { M3u8DownTask } from '../../utils/m3u8_helper';
 import router from '../../routers';
 
 const props = defineProps<{
@@ -149,21 +148,7 @@ function handleDeleteVideo() {
   });
 }
 
-let workPath = '';
-invoke('handle_get_work_path', {}).then((resp: any) => {
-  workPath = resp.data;
-});
 
-const onDown = (e: Episode) => {
-  let task: M3u8DownTask = {
-    uuid: form.id + '-' + e.index,
-    name: form.title + '-' + e.title,
-    url: e.url,
-    workPath: workPath + '\\' + form.id,
-    outputFilePath: workPath + '\\' + form.id + '\\' + e.index + '.mp4',
-  };
-  m3u8Downloader.submitTask(task);
-};
 const columns = [
   {
     title: '标题',
@@ -177,13 +162,13 @@ const columns = [
   {
     title: '状态',
     width: 80,
-    dataIndex: 'file_path',
+    dataIndex: 'local_path',
   },
-  {
-    title: '操作',
-    width: 80,
-    dataIndex: 'action',
-  },
+  // {
+  //   title: '操作',
+  //   width: 80,
+  //   dataIndex: 'action',
+  // },
 ];
 </script>
 
