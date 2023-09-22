@@ -7,7 +7,7 @@
       @click="togglePlayListModal"
     ></div>
 
-    <div class="episode-list mt-24" :class="playListModalVisible ? 'show' : 'hide'">
+    <div class="episode-list" :class="playListModalVisible ? 'show' : 'hide'">
       <div class="flex-row" style="flex-wrap: wrap">
         <template v-for="(item, index) in currentVideo.episodes">
           <a-tooltip :mouseEnterDelay="0.8">
@@ -23,7 +23,7 @@
     </div>
     <div class="video-name">
       <!-- <span>{{ currentVideo.title }}-{{ currentEpisode?.title }}</span> -->
-      <img :src="logoUrl" @error="" alt="" srcset="" style="height: 40px" />
+      <img :src="logoUrl" @error="" alt="" srcset="" style="height: 20px" />
     </div>
     <video
       id="videoInstance"
@@ -155,7 +155,7 @@ const playVideo = (e: Episode, index: number) => {
   currentEpisode = e;
   currentIndex.value = index;
   let localPath = '';
-  if (currentEpisode.local_path) {
+  if (currentEpisode.local_path && currentEpisode.local_path.indexOf('.mp4') !== -1) {
     if (currentVideo.type == 2) {
       localPath = `Season-${currentEpisode.season}\\${currentEpisode.local_path}`;
       localPath = getMediaLocalResouce(currentVideo, localPath);
@@ -224,7 +224,7 @@ register('CommandOrControl+Shift+F', () => {
 
 //窗口逻辑
 //切换窗口大小
-const toggleWindowSize = async () => {
+const toggleWindowSize = async (init: boolean = false) => {
   if (windowHelper.currentWindowSize === WindowSize.MINI) {
     toggleMenuBar(true);
     await windowHelper.alwaysOnTop(false);
@@ -241,6 +241,7 @@ const initWindow = async () => {
   if (appConfig.playPageAutoMini) {
     await windowHelper.miniScreen();
   }
+
   if (windowHelper.currentWindowSize === WindowSize.MINI) {
     toggleMenuBar(false);
   }

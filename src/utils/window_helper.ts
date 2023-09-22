@@ -1,5 +1,6 @@
 import { LogicalSize, appWindow } from '@tauri-apps/api/window';
 import appConfig from './config';
+import { settingStore } from './store';
 
 
 
@@ -10,9 +11,11 @@ enum WindowSize {
 
 
 class WindowHelper {
-    currentWindowSize: WindowSize = WindowSize.NORMAL
+    currentWindowSize: WindowSize;
     lock: boolean = false
-    constructor() { }
+    constructor() {
+        this.currentWindowSize = settingStore.get("currentWindowSize") || WindowSize.NORMAL
+    }
 
     // 设置为标准大小屏幕
     async normalScreen() {
@@ -23,6 +26,7 @@ class WindowHelper {
         try {
             await appWindow.setSize(new LogicalSize(appConfig.normalWindowSize[0], appConfig.normalWindowSize[1]));
             this.currentWindowSize = WindowSize.NORMAL
+            settingStore.set("currentWindowSize", this.currentWindowSize, true)
         } finally {
             this.lock = false
         }
@@ -37,13 +41,14 @@ class WindowHelper {
         try {
             await appWindow.setSize(new LogicalSize(appConfig.miniWindowSize[0], appConfig.miniWindowSize[1]));
             this.currentWindowSize = WindowSize.MINI
+            settingStore.set("currentWindowSize", this.currentWindowSize, true)
         } finally {
             this.lock = false
         }
     }
 
 
-    async maxScreen(){
+    async maxScreen() {
         await appWindow.maximize()
     }
 
