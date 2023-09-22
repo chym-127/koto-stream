@@ -18,27 +18,24 @@ class PlayHistory {
     constructor() {
     }
 
-    set(videoId: number, episodeIndex: number, progress: number) {
-        let videoIdStr = String(videoId)
-        let data = store.get(videoIdStr) || {}
+    set(key: string, episodeIndex: number, progress: number) {
+        let data = store.get(key) || {}
         data[episodeIndex] = {
             progress: progress,
             updateAt: +new Date()
         }
-        store.set(videoIdStr, data, true)
+        store.set(key, data, true)
     }
 
 
-    get(videoId: number, episodeIndex: number) {
-        let videoIdStr = String(videoId)
-        let data = store.get(videoIdStr) || {}
+    get(key: string, episodeIndex: number) {
+        let data = store.get(key) || {}
         return data[episodeIndex] || null
     }
 
 
-    getRecentEpisod(videoId: number): (RecentEpisodRecord | null) {
-        let videoIdStr = String(videoId)
-        let data: { [key: number]: History } = store.get(videoIdStr) || null
+    getRecentEpisod(key: string): (RecentEpisodRecord | null) {
+        let data: { [key: number]: History } = store.get(key) || null
 
         if (data) {
             let newRecord: RecentEpisodRecord = {

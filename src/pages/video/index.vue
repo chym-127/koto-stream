@@ -35,7 +35,8 @@
           <a-tooltip :mouseEnterDelay="0.3">
             <template #title>{{ item.description || '暂无简介' }}</template>
             <div class="episode-item" @click="playVideo(index)">
-              <span class="font-14-400 c-000">第{{ item.index }}集</span>
+              <span class="font-14-400 c-000" v-if="video.type === 2">第{{ item.index }}集</span>
+              <span class="font-14-400 c-000" v-if="video.type === 1">Play</span>
             </div>
           </a-tooltip>
         </template>
@@ -102,10 +103,13 @@ function handleGetVideo() {
         }
       });
     }
+    video.full_name = `${video.title}(${video.release_date})`;
 
-    lastRecent = playHistory.getRecentEpisod(Number(id));
-    if (lastRecent) {
-      historyTips.newTipConfirm(`检测到上次播放到第${lastRecent.index}集，是否继续播放`, -1);
+    if (video.type === 2) {
+      lastRecent = playHistory.getRecentEpisod(video.full_name);
+      if (lastRecent) {
+        historyTips.newTipConfirm(`检测到上次播放到第${lastRecent.index}集，是否继续播放`, -1);
+      }
     }
   });
 }
@@ -137,7 +141,7 @@ const setMenu = (menus: any) => {
 
 const downloadAll = () => {
   downMediaByID({ id: video.id }).then((resp: any) => {
-    message.success("已加入下载队列")
+    message.success('已加入下载队列');
   });
 };
 
@@ -212,12 +216,14 @@ onUnmounted(() => {
     rgba(1, 1, 1, 1),
     rgba(1, 1, 1, 0.9),
     rgba(1, 1, 1, 0.9),
+    rgba(1, 1, 1, 0.9),
     rgba(1, 1, 1, 0.8),
     rgba(1, 1, 1, 0.8),
-    rgba(1, 1, 1, 0),
+    rgba(1, 1, 1, 0.8),
+    rgba(1, 1, 1, 0.5),
     rgba(1, 1, 1, 0)
   );
-  opacity: 0.7;
+  opacity: 0.6;
   top: 0;
   left: 0;
   z-index: 2;
@@ -274,7 +280,7 @@ onUnmounted(() => {
         height: 100%;
         background-color: #000;
         border-radius: 8px;
-        opacity: 0.3;
+        opacity: 0.1;
       }
     }
   }

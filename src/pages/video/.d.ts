@@ -1,6 +1,7 @@
 interface VideoInfo {
     id: number,
     title: string,
+    full_name?: string,
     poster_url?: string,
     fanart_url?: string,
     type?: number,

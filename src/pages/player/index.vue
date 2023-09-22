@@ -57,7 +57,7 @@ import { getMediaLocalResouce } from '../../utils';
 const totalDuration = ref(0);
 const route = useRoute();
 const currentVideo = reactive<VideoInfo>(store.get('CURRENT_VIDEO'));
-
+currentVideo.full_name = `${currentVideo.title}(${currentVideo.release_date})`;
 let logoUrl = getMediaLocalResouce(currentVideo, 'logo.png');
 let currentEpisode: Episode | undefined;
 let videoPlayConfig: VideoPlayConfig | undefined;
@@ -295,12 +295,12 @@ const historyTips = new TipsConfirm(document.getElementById('content') as Elemen
 
 let progressState = 0;
 function addHistory(progress: number) {
-  playHistory.set(currentVideo.id, currentEpisode!.index, progress);
+  playHistory.set(currentVideo.full_name!, currentEpisode!.index, progress);
   progressState = progress;
 }
 
 function checkHasHistory() {
-  let data = playHistory.get(currentVideo.id, currentEpisode!.index);
+  let data = playHistory.get(currentVideo.full_name!, currentEpisode!.index);
   if (data && data.progress) {
     progress.value = data.progress;
     progressStr.value = new Date(data.progress * 1000).toISOString().slice(11, 19);
