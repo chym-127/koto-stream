@@ -14,17 +14,20 @@ window.saveVod = function () {
     localStorage.setItem("CURRENT_INDEX", "")
 }
 
+
 function sendData(MOVS) {
+    let items = []
     for (const key in MOVS) {
         if (Object.hasOwnProperty.call(MOVS, key)) {
             const item = MOVS[key];
-            var xmlhttp = new XMLHttpRequest();
-            var url = 'http://localhost:8080/import/media';
-            xmlhttp.open("POST", url);
-            xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xmlhttp.send(JSON.stringify({ medias: [item] }));
+            items.push(item)
         }
     }
+    var xmlhttp = new XMLHttpRequest();
+    var url = 'http://localhost:8080/import/media';
+    xmlhttp.open("POST", url);
+    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlhttp.send(JSON.stringify({ medias: items }));
 }
 
 
@@ -77,7 +80,7 @@ const seasonReg = /第.?季/g;
     window.episodes = localStorage.getItem('EPISODES') ? JSON.parse(localStorage.getItem('EPISODES')) : {}
     let el = document.querySelector('#playleft > iframe')
     if (el) {
-        
+
         let src = el.getAttribute('src')
         let found = src.match(reg)
         let currentVod = document.querySelector("li[class='on']")
