@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { message } from 'ant-design-vue';
+import { settingStore } from '../utils/store';
 
-
+const baseURL = settingStore.get('api_base_url') || ''
 const instance = axios.create({
-    baseURL: 'http://localhost:8080/',
+    baseURL: baseURL,
     timeout: 60 * 1000,
     headers: { 'Content-Type': 'application/json' }
 });

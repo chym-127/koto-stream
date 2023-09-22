@@ -12,7 +12,22 @@
         <a-row :gutter="16">
           <a-col :span="24">
             <a-form-item label="媒体库路径" name="title">
-              <a-input v-model:value="form.media_path" @blur="inputBlur('media_path')" placeholder="请输入媒体库路径" />
+              <a-input
+                v-model:value="form.media_path"
+                @blur="inputBlur('media_path', form.media_path)"
+                placeholder="请输入媒体库路径"
+              />
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <a-row :gutter="16">
+          <a-col :span="24">
+            <a-form-item label="API地址" name="title">
+              <a-input
+                v-model:value="form.api_base_url"
+                @blur="inputBlur('api_base_url', form.api_base_url)"
+                placeholder="请输入API地址"
+              />
             </a-form-item>
           </a-col>
         </a-row>
@@ -28,6 +43,7 @@ import { settingStore } from '../../../utils/store';
 
 const form = reactive({
   media_path: settingStore.get('media_path') || '',
+  api_base_url: settingStore.get('api_base_url') || '',
 });
 const open = ref<boolean>(false);
 
@@ -44,12 +60,8 @@ const menuClickCallback = function (data: any) {
   }
 };
 
-const inputBlur = (str: string) => {
-  console.log(str);
-
-  if (str === 'media_path') {
-    settingStore.set(str, form.media_path, true);
-  }
+const inputBlur = (key: string, value: string) => {
+  settingStore.set(key, value, true);
 };
 
 onUnmounted(() => {
