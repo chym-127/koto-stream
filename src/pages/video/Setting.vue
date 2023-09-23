@@ -70,7 +70,6 @@
 import { invoke } from '@tauri-apps/api/tauri';
 import { reactive, ref } from 'vue';
 import { Form } from 'ant-design-vue';
-import { convertFileSrc } from '@tauri-apps/api/tauri';
 import type { Rule } from 'ant-design-vue/es/form';
 import router from '../../routers';
 import { updateMediaApi } from '../../api';
@@ -123,7 +122,7 @@ const onClose = () => {
 
 const resetInfo = () => {
   Object.assign(form, props.info);
-  Object.assign(playConfigForm, form.expand);
+  Object.assign(playConfigForm, form.play_config);
 };
 
 defineExpose({ resetInfo });

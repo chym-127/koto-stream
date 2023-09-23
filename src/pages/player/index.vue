@@ -67,7 +67,7 @@ if (currentVideo) {
   currentEpisode = currentVideo.episodes?.find((item, index) => {
     return index === currentIndex.value;
   });
-  videoPlayConfig = currentVideo.expand;
+  videoPlayConfig = currentVideo.play_config;
 }
 let videoInstance: any = null;
 let hls: Hls | null = null;

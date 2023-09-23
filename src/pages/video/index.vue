@@ -103,6 +103,8 @@ function handleGetVideo() {
         }
       });
     }
+    video.play_config = video.play_config ? JSON.parse(resp.data.play_config) : null;
+    
     video.full_name = `${video.title}(${video.release_date})`;
 
     if (video.type === 2) {

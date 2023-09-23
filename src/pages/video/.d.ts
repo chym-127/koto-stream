@@ -9,7 +9,8 @@ interface VideoInfo {
     description?: string,
     release_date?: string,
     episodes?: Episode[],
-    expand?: VideoPlayConfig,
+    expand?: string,
+    play_config?: VideoPlayConfig,
     score?: number,
 }
 
