@@ -50,4 +50,9 @@ const listDownTask = (data: any = {}) => {
     return instance.post('list/task', data)
 }
 
-export { listMedia, getMediaByID, downMediaByID, listDownTask }
+
+const updateMediaApi = (data: any) => {
+    return instance.post('update/media', data)
+}
+
+export { listMedia, getMediaByID, downMediaByID, listDownTask,updateMediaApi }

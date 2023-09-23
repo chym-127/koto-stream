@@ -73,6 +73,7 @@ import { Form } from 'ant-design-vue';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import type { Rule } from 'ant-design-vue/es/form';
 import router from '../../routers';
+import { updateMediaApi } from '../../api';
 
 const props = defineProps<{
   visible: boolean;
@@ -85,7 +86,7 @@ const form = reactive<VideoInfo>({
   description: '',
   release_date: '',
   episodes: [],
-  score: 0,  
+  score: 0,
   title: '',
 });
 
@@ -129,13 +130,11 @@ defineExpose({ resetInfo });
 
 function handleUpdateVideo(data: VideoInfo) {
   let resq = {
-    ...data,
-    episodes: JSON.stringify(data.episodes),
-    expand: JSON.stringify(playConfigForm),
+    id: data.id,
+    episodes: data.episodes,
+    play_config: JSON.stringify(playConfigForm),
   };
-  invoke('handle_update_video', {
-    t: resq,
-  }).then((resp: any) => {
+  updateMediaApi(resq).then((resp: any) => {
     emit('update');
   });
 }
@@ -147,7 +146,6 @@ function handleDeleteVideo() {
     router.push('/');
   });
 }
-
 
 const columns = [
   {
