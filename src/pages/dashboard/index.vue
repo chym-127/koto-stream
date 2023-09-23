@@ -31,9 +31,11 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { reactive, ref } from 'vue';
-import { listMedia } from '../../api/index';
+import { onUnmounted, reactive, ref } from 'vue';
+import { getMediaByID, listMedia } from '../../api/index';
 import { getMediaLocalResouce } from '../../utils';
+import eventBus, { EventMsg } from '../../utils/event_bus';
+import store from '../../utils/store';
 const router = useRouter();
 let items = reactive<VideoInfo[]>([]);
 
@@ -44,11 +46,65 @@ interface ListReq {
   type: number;
 }
 
+interface LastMedia {
+  id: number;
+  e_index: number;
+}
+
+const setMenu = (menus: any) => {
+  let msg: EventMsg = {
+    id: 'set-custom-menu',
+    name: '设置菜单',
+    data: menus,
+  };
+  eventBus.publicize(msg);
+};
+
+let lastVideo = store.get('LAST_VIDEO') || null;
+let video: VideoInfo = {
+  id: 0,
+  title: '',
+};
+if (lastVideo && lastVideo.id) {
+  getMediaByID({ id: lastVideo.id }).then((resp: any) => {
+    Object.assign(video, resp.data);
+    if (video.episodes && video.episodes.length) {
+      video.episodes!.forEach((episode) => {
+        episode.description = episode.description?.replace(/ /g, '+').replace(/\n/g, '');
+        if (episode.description && episode.description.length >= 256) {
+          episode.description = episode.description.slice(0, 256) + '...';
+        }
+      });
+    }
+    setMenu([
+      {
+        id: 'PLAY_LAST_VIDEO',
+        name: `继续播放：${video.title}`,
+        clickFunc: playLastMedia,
+      },
+    ]);
+  });
+}
+
+onUnmounted(() => {
+  setMenu([]);
+});
+
+function playLastMedia() {
+  store.set('CURRENT_VIDEO', video, true);
+  router.push({
+    path: '/video/player',
+    query: {
+      index: lastVideo.e_index,
+    },
+  });
+}
+
 const listReqForm = reactive<ListReq>({
   keywords: '',
   current: 1,
   page_limit: 20,
-  type: 0
+  type: 0,
 });
 
 function handleListVideo() {

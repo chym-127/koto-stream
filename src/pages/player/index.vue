@@ -65,7 +65,7 @@ let videoPlayConfig: VideoPlayConfig | undefined;
 let currentIndex = ref<number>(Number(route.query.index));
 if (currentVideo) {
   currentEpisode = currentVideo.episodes?.find((item, index) => {
-    return index === currentIndex.value;
+    return item.index === currentIndex.value;
   });
   videoPlayConfig = currentVideo.play_config;
 }
@@ -88,6 +88,7 @@ const toggleMenuBar = (visible: boolean) => {
     data: visible,
   };
   eventBus.publicize(msg);
+  setMenu(menus);
 };
 
 const playListModalVisible = ref(false);
@@ -104,7 +105,18 @@ let menus = [
 
 setMenu(menus);
 
+let timeId = setTimeout(() => {
+  store.set(
+    'LAST_VIDEO',
+    {
+      id: currentVideo.id,
+      e_index: currentEpisode?.index,
+    },
+    true
+  );
+}, 1000 * 30);
 onUnmounted(() => {
+  clearTimeout(timeId);
   setMenu([]);
   restoreWindow();
   historyTips.destroy();

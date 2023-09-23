@@ -34,7 +34,7 @@
         <template v-for="(item, index) in video.episodes">
           <a-tooltip :mouseEnterDelay="0.3">
             <template #title>{{ item.description || '暂无简介' }}</template>
-            <div class="episode-item" @click="playVideo(index)">
+            <div class="episode-item" @click="playVideo(item.index)">
               <span class="font-14-400 c-000" v-if="video.type === 2">第{{ item.index }}集</span>
               <span class="font-14-400 c-000" v-if="video.type === 1">Play</span>
             </div>
@@ -104,7 +104,7 @@ function handleGetVideo() {
       });
     }
     video.play_config = video.play_config ? JSON.parse(resp.data.play_config) : null;
-    
+
     video.full_name = `${video.title}(${video.release_date})`;
 
     if (video.type === 2) {
