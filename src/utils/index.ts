@@ -87,7 +87,6 @@ function getMediaLocalResouce(v: VideoInfo, fileName: string, hasTitle: boolean 
     return ""
   }
   let workPath = media_path + "\\" + (v.type === 1 ? 'movies' : 'tvs') + `\\${v.title}(${v.release_date})\\` + (v.type === 1 && hasTitle ? v.title + '-' : '') + fileName
-  console.log(workPath);
 
   return convertFileSrc(workPath)
 }

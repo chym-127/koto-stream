@@ -21,7 +21,7 @@
         </template>
       </div>
     </div>
-    <div class="video-name">
+    <div class="video-name" v-if="currentVideo.type === 2">
       <!-- <span>{{ currentVideo.title }}-{{ currentEpisode?.title }}</span> -->
       <img :src="logoUrl" @error="" alt="" srcset="" style="height: 20px" />
     </div>
