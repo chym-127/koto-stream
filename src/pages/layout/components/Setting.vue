@@ -8,7 +8,7 @@
     @close="onClose"
   >
     <div class="p-24">
-      <a-form :model="form" layout="vertical">
+      <a-form :model="form" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }">
         <a-row :gutter="16">
           <a-col :span="24">
             <a-form-item label="媒体库路径" name="title">
@@ -31,6 +31,21 @@
             </a-form-item>
           </a-col>
         </a-row>
+
+        <a-row :gutter="16">
+          <a-col :span="24">
+            <a-form-item label="媒体库操作" name="title">
+              <a-space style="width: 100%">
+                <a-button type="primary" :loading="downAllMediaLoading" @click="downAllMedia">
+                  下载所有未本地化的媒体
+                </a-button>
+                <a-button type="primary" :loading="updateAllMediaMetaLoading" @click="updateAllMediaMeta">
+                  更新媒体资料
+                </a-button>
+              </a-space>
+            </a-form-item>
+          </a-col>
+        </a-row>
       </a-form>
       <div style="clear: both"></div>
     </div>
@@ -40,12 +55,41 @@
 import { onUnmounted, reactive, ref } from 'vue';
 import eventBus from '../../../utils/event_bus';
 import { settingStore } from '../../../utils/store';
+import { downAllMediaNotLocal, updateAllMediaMetaApi } from '../../../api';
+import { message } from 'ant-design-vue';
 
 const form = reactive({
   media_path: settingStore.get('media_path') || '',
   api_base_url: settingStore.get('api_base_url') || '',
 });
 const open = ref<boolean>(false);
+
+const downAllMediaLoading = ref<boolean>(false);
+const updateAllMediaMetaLoading = ref<boolean>(false);
+
+function downAllMedia() {
+  downAllMediaLoading.value = true;
+  downAllMediaNotLocal()
+    .then(() => {
+      message.success('操作成功');
+    })
+    .catch(() => {})
+    .finally(() => {
+      downAllMediaLoading.value = false;
+    });
+}
+
+function updateAllMediaMeta() {
+  updateAllMediaMetaLoading.value = true;
+  updateAllMediaMetaApi()
+    .then(() => {
+      message.success('操作成功');
+    })
+    .catch(() => {})
+    .finally(() => {
+      updateAllMediaMetaLoading.value = false;
+    });
+}
 
 function showModal() {
   open.value = !open.value;

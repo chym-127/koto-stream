@@ -304,7 +304,7 @@ function checkHasHistory() {
   if (data && data.progress) {
     progress.value = data.progress;
     progressStr.value = new Date(data.progress * 1000).toISOString().slice(11, 19);
-    historyTips.newTipConfirm(`上次播放至 ${progressStr.value},是否继续播放`, 10);
+    historyTips.newTipConfirm(`上次播放至 ${progressStr.value},是否继续播放`, 20);
   }
 }
 

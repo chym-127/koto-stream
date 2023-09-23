@@ -55,4 +55,13 @@ const updateMediaApi = (data: any) => {
     return instance.post('update/media', data)
 }
 
-export { listMedia, getMediaByID, downMediaByID, listDownTask,updateMediaApi }
+
+const updateAllMediaMetaApi = (data: any = {}) => {
+    return instance.post('update/medias/from-disk', data)
+}
+
+const downAllMediaNotLocal = (data: any = {}) => {
+    return instance.post('down/media/nolocal', data)
+}
+
+export { listMedia, getMediaByID, downMediaByID, listDownTask, updateMediaApi, updateAllMediaMetaApi, downAllMediaNotLocal }

@@ -16,10 +16,11 @@
       </a-tabs>
       <div class="h-0 flex-1" style="overflow: auto">
         <div style="padding: 0 24px 24px 24px" v-show="activeKey === '2'">
-          <a-table :columns="columns" :data-source="form.episodes" bordered>
+          <a-table :columns="columns" :data-source="form.episodes" bordered :scroll="{ y: 400 }">
             <template #bodyCell="{ column, text, record }: any">
               <template v-if="column.dataIndex === 'title'">
-                <a-input v-model:value="record.title" disabled placeholder="请输入名称" />
+                <span>{{record.title}}</span>
+                <!-- <a-input v-model:value="record.title" disabled placeholder="请输入名称" /> -->
               </template>
               <template v-if="column.dataIndex === 'url'">
                 <a-input v-model:value="record.url" placeholder="请输入url" />
@@ -58,10 +59,9 @@
       </div>
     </div>
     <a-space style="position: absolute; top: 8px; right: 24px">
-      <!-- <a-button @click=" onClose ">取消</a-button> -->
-      <a-popconfirm title="你确认要删除这个资源吗?" ok-text="Yes" cancel-text="No" @confirm="handleDeleteVideo()">
+      <!-- <a-popconfirm title="你确认要删除这个资源吗?" ok-text="Yes" cancel-text="No" @confirm="handleDeleteVideo()">
         <a-button type="primary" danger>删除</a-button>
-      </a-popconfirm>
+      </a-popconfirm> -->
       <a-button type="primary" @click="onSubmit">更新</a-button>
     </a-space>
   </a-drawer>
