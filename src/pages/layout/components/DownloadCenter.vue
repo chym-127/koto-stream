@@ -10,8 +10,16 @@
     :footer-style="{ textAlign: 'right' }"
     @close="onClose"
   >
-    <div style="padding: 0">
-      <a-table :columns="columns" :data-source="taskList" bordered rowKey="id">
+    <div style="padding: 12px">
+      <a-table
+        :columns="columns"
+        :scroll="{
+          y: 480,
+        }"
+        :data-source="taskList"
+        bordered
+        rowKey="id"
+      >
         <template #bodyCell="{ column, text, record }: any">
           <template v-if="column.dataIndex === 'name'">
             <span>{{ text }}</span>
