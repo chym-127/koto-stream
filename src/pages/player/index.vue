@@ -53,6 +53,7 @@ import appConfig from '../../utils/config';
 import windowHelper, { WindowSize } from '../../utils/window_helper';
 import TipsConfirm from '../../utils/tips_confirm';
 import { getMediaLocalResouce } from '../../utils';
+import { TauriLoader,fetchSupported } from './TauriLoader';
 
 const totalDuration = ref(0);
 const route = useRoute();
@@ -148,6 +149,9 @@ onMounted(() => {
 
   if (Hls.isSupported()) {
     hls = new Hls();
+    // hls = new Hls({
+    //   loader: TauriLoader,
+    // });
     hls.on(Hls.Events.MEDIA_ATTACHED, function () {
       console.log('video and hls.js are now bound together !');
     });
@@ -167,7 +171,7 @@ const playVideo = (e: Episode, index: number) => {
   currentEpisode = e;
   currentIndex.value = index;
   let localPath = '';
-  if (currentEpisode.local_path && currentEpisode.local_path.indexOf('.mp4') !== -1) {
+  if (currentEpisode.local_path) {
     if (currentVideo.type == 2) {
       localPath = `Season-${currentEpisode.season}\\${currentEpisode.local_path}`;
       localPath = getMediaLocalResouce(currentVideo, localPath);
@@ -175,7 +179,7 @@ const playVideo = (e: Episode, index: number) => {
       localPath = getMediaLocalResouce(currentVideo, currentEpisode.local_path, false);
     }
   }
-  if (localPath) {
+  if (localPath && localPath.indexOf('.mp4') !== -1) {
     videoInstance.src = localPath;
   } else {
     hls!.loadSource(currentEpisode.url);

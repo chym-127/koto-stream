@@ -37,7 +37,11 @@
       },
       "http": {
         "all": true,
-        "request": true
+        "request": true,
+        "scope": [
+          "https://**",
+          "http://**"
+        ]
       },
       "globalShortcut": {
         "all": true

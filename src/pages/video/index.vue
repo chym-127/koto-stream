@@ -36,7 +36,7 @@
             <template #title>{{ item.description || '暂无简介' }}</template>
             <div class="episode-item" @click="playVideo(item.index)">
               <span class="font-14-400 c-000" v-if="video.type === 2">第{{ item.index }}集</span>
-              <span class="font-14-400 c-000" v-if="video.type === 1">Play</span>
+              <span class="font-14-400 c-000" v-if="video.type === 1">播放</span>
             </div>
           </a-tooltip>
         </template>
