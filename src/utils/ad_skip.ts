@@ -39,7 +39,7 @@ function extractAds(url: string) {
                             if (count !== (current - 1)) {
                                 if (!flag) {
                                     flag = true
-                                    temp.startSec = totalSec - sec
+                                    temp.startSec = totalSec - sec - 0.5
                                 }
                             } else {
                                 if (flag) {
