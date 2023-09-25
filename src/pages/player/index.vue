@@ -53,7 +53,8 @@ import appConfig from '../../utils/config';
 import windowHelper, { WindowSize } from '../../utils/window_helper';
 import TipsConfirm from '../../utils/tips_confirm';
 import { getMediaLocalResouce } from '../../utils';
-import { TauriLoader,fetchSupported } from './TauriLoader';
+import { TauriLoader, fetchSupported } from './TauriLoader';
+import extractAds, { AdsRange } from '../../utils/ad_skip';
 
 const totalDuration = ref(0);
 const route = useRoute();
@@ -72,6 +73,7 @@ if (currentVideo) {
 }
 let videoInstance: any = null;
 let hls: Hls | null = null;
+let ads: AdsRange[] = [];
 
 const setMenu = (menus: any) => {
   let msg: EventMsg = {
@@ -137,6 +139,13 @@ function timeupdate() {
         playNextVideo();
       }
     }
+    console.log(videoInstance.currentTime);
+    
+    ads.forEach((range) => {
+      if (range.startSec <= videoInstance.currentTime && videoInstance.currentTime <= range.endSec) {
+        seekVideo(range.sec);
+      }
+    });
   }
 }
 
@@ -182,6 +191,11 @@ const playVideo = (e: Episode, index: number) => {
   if (localPath && localPath.indexOf('.mp4') !== -1) {
     videoInstance.src = localPath;
   } else {
+    extractAds(currentEpisode.url).then((resp: any) => {
+      ads = resp as AdsRange[];
+      console.log(ads);
+      
+    });
     hls!.loadSource(currentEpisode.url);
   }
 
