@@ -35,8 +35,9 @@
       width="100%"
       preload="auto"
       data-setup="{}"
-      class="video-box"
+      class="video-box mask"
     ></video>
+    <div class="mask" v-if="hasMask"></div>
   </div>
 </template>
 
@@ -47,7 +48,7 @@ import { register, unregisterAll } from '@tauri-apps/api/globalShortcut';
 import { useRoute } from 'vue-router';
 import Hls from 'hls.js';
 import eventBus, { EventMsg } from '../../utils/event_bus';
-import store from '../../utils/store';
+import store, { settingStore } from '../../utils/store';
 import playHistory from '../video/history';
 import appConfig from '../../utils/config';
 import windowHelper, { WindowSize } from '../../utils/window_helper';
@@ -56,6 +57,7 @@ import { getMediaLocalResouce } from '../../utils';
 import { TauriLoader, fetchSupported } from './TauriLoader';
 import extractAds, { AdsRange } from '../../utils/ad_skip';
 
+const hasMask = ref(settingStore.get('play_mask') || false);
 const totalDuration = ref(0);
 const route = useRoute();
 const currentVideo = reactive<VideoInfo>(store.get('CURRENT_VIDEO'));
@@ -410,5 +412,15 @@ const clickHistoryTips = (second: number) => {
   opacity: 0.3s;
   font-size: 6px;
   color: #ffffff33;
+}
+
+.mask {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
 }
 </style>

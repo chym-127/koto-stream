@@ -46,6 +46,25 @@
             </a-form-item>
           </a-col>
         </a-row>
+
+        <a-row :gutter="16">
+          <a-col :span="24">
+            <a-form-item label="播放蒙层" name="title">
+              <a-space style="width: 100%">
+                <a-switch
+                  v-model:checked="form.play_mask"
+                  @change="
+                    () => {
+                      inputBlur('play_mask', form.play_mask);
+                    }
+                  "
+                  checked-children="开"
+                  un-checked-children="关"
+                />
+              </a-space>
+            </a-form-item>
+          </a-col>
+        </a-row>
       </a-form>
       <div style="clear: both"></div>
     </div>
@@ -61,6 +80,7 @@ import { message } from 'ant-design-vue';
 const form = reactive({
   media_path: settingStore.get('media_path') || '',
   api_base_url: settingStore.get('api_base_url') || '',
+  play_mask: settingStore.get('play_mask') || false,
 });
 const open = ref<boolean>(false);
 
