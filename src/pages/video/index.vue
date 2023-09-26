@@ -31,7 +31,7 @@
     </div>
 
     <div style="padding: 0 40px 20px 40px; overflow: auto; height: 150px">
-      <a-tabs v-model:activeKey="activeKey" style="z-index: 9999; position: relative" :tabBarStyle="{ color: '#999' }">
+      <a-tabs v-model:activeKey="activeKey" style="z-index: 3; position: relative" :tabBarStyle="{ color: '#999' }">
         <a-tab-pane :tab="season.name" v-for="(season, index) in seasons" :key="index">
           <div class="episodes flex-row">
             <template v-for="(item, index) in season.episodes">
