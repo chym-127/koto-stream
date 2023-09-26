@@ -13,7 +13,7 @@
           <a-tooltip :mouseEnterDelay="0.8">
             <template #title>{{ item.description || '暂无简介' }}</template>
             <div class="episode-item" @click="playVideo(item, index)">
-              <div class="card-box" :class="index === currentIndex ? 'active' : null">
+              <div class="card-box" :class="item.index === currentIndex ? 'active' : null">
                 <span class="c-fff">{{ item.index }}</span>
               </div>
             </div>

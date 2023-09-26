@@ -4,18 +4,29 @@
       <span class="font-16-800" data-tauri-drag-region>KOTO_STREAM</span>
     </div>
     <div class="menu flex-row flex-1" style="justify-content: space-between" data-tauri-drag-region>
-      <template v-if="menuVisible">
-        <div class="flex-row">
-          <div
-            class="menu-item flex-row items-center"
-            v-for="(item, index) in menus"
-            @click="menuClick(item)"
-            :key="index"
-          >
-            <span>{{ item.name }}</span>
-          </div>
+      <div class="flex-row" v-if="menuVisible">
+        <div
+          class="menu-item flex-row items-center"
+          v-for="(item, index) in menus"
+          @click="menuClick(item)"
+          :key="index"
+        >
+          <span>{{ item.name }}</span>
         </div>
-      </template>
+      </div>
+      <div class="flex-row" v-else>
+        <div
+          class="menu-item flex-row items-center"
+          @click="
+            menuClick({
+              id: 'BACK',
+              name: '返回',
+            })
+          "
+        >
+          <span>返回</span>
+        </div>
+      </div>
 
       <div class="flex-row">
         <div
