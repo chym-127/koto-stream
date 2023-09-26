@@ -44,6 +44,12 @@ function getVideoInfoFromClub(MOVS) {
 
         let titleDom = document.getElementsByClassName("product-title")[0]
         obj.title = titleDom.firstChild.textContent.replaceAll(seasonReg, "")
+        if (MOVS[obj.title]) {
+            obj = Object.assign(obj, MOVS[obj.title])
+        }
+        if (!obj["episodes"] || !obj["episodes"].length) {
+            obj["episodes"] = []
+        }
         obj.release_date = Number(titleDom.querySelector('span:nth-child(1)').textContent.slice(1, -1))
         // obj.score = titleDom.getElementsByClassName('rate')[0].innerText
 
@@ -56,7 +62,7 @@ function getVideoInfoFromClub(MOVS) {
         // }
         window.episodes = localStorage.getItem('EPISODES') ? JSON.parse(localStorage.getItem('EPISODES')) : {}
         let result = Object.keys(window.episodes).map((key) => window.episodes[key]);
-        obj["episodes"] = result
+        obj["episodes"] = obj["episodes"].concat(result)
         MOVS[obj.title] = obj
     } catch (error) {
         console.log(error);
@@ -72,6 +78,10 @@ const seasonMapper = {
     四: 4,
     五: 5,
     六: 6,
+    七: 7,
+    八: 8,
+    九: 9,
+    十: 10,
 };
 const seasonReg = /第.?季/g;
 (async function () {
@@ -168,9 +178,7 @@ function playNextVideo(nextNode) {
 
     })
     if (document.body) {
-        setTimeout(() => {
-            document.body.appendChild(el)
-        }, 3000);
+        document.body.appendChild(el)
     }
 })();
 

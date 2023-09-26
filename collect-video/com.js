@@ -5,6 +5,10 @@ const seasonMapper = {
     四: 4,
     五: 5,
     六: 6,
+    七: 7,
+    八: 8,
+    九: 9,
+    十: 10,
 };
 const seasonReg = /第.?季/g;
 (function (xhr) {
@@ -94,9 +98,7 @@ const seasonReg = /第.?季/g;
 
     })
     if (document.body) {
-        setTimeout(() => {
-            document.body.appendChild(el)
-        }, 1000);
+        document.body.appendChild(el)
     }
 })();
 
@@ -194,8 +196,14 @@ function getVideoInfoFromCom(MOVS) {
 
         }
     }
+    if (MOVS[obj.title]) {
+        obj = Object.assign(obj, MOVS[obj.title])
+    }
+    if (!obj["episodes"] || !obj["episodes"].length) {
+        obj["episodes"] = []
+    }
     let result = Object.keys(window.episodes).map((key) => window.episodes[key]);
-    obj["episodes"] = result
+    obj["episodes"] = obj["episodes"].concat(result)
     MOVS[obj.title] = obj
     return MOVS
 }

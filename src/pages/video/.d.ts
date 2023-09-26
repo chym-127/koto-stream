@@ -31,3 +31,9 @@ interface Episode {
     season: number,
 }
 
+
+interface SeasonItem {
+    name: string,
+    num: number;
+    episodes: Episode[];
+}

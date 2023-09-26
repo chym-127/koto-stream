@@ -19,7 +19,7 @@
           <a-table :columns="columns" :data-source="form.episodes" bordered :scroll="{ y: 400 }">
             <template #bodyCell="{ column, text, record }: any">
               <template v-if="column.dataIndex === 'title'">
-                <span>{{record.title}}</span>
+                <span>{{ record.title }}</span>
                 <!-- <a-input v-model:value="record.title" disabled placeholder="请输入名称" /> -->
               </template>
               <template v-if="column.dataIndex === 'url'">
@@ -27,7 +27,7 @@
               </template>
 
               <template v-if="column.dataIndex === 'local_path'">
-                <span>{{ text ? '已下载' : '未下载' }}</span>
+                <span>{{ text && text.indexOf('.mp4') !== -1 ? '已下载' : '未下载' }}</span>
               </template>
 
               <!-- <template v-if="column.dataIndex === 'action'">

@@ -43,7 +43,7 @@ function extractAds(url: string) {
                                 }
                             } else {
                                 if (flag) {
-                                    temp.endSec = totalSec - sec
+                                    temp.endSec = totalSec - sec + 0.5
                                     temp.sec = Number((temp.endSec - temp.startSec).toFixed(4))
                                     resp.push(temp)
                                 }

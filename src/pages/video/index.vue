@@ -29,18 +29,23 @@
         </div>
       </div>
     </div>
+
     <div style="padding: 0 40px 20px 40px; overflow: auto; height: 150px">
-      <div class="episodes flex-row">
-        <template v-for="(item, index) in video.episodes">
-          <a-tooltip :mouseEnterDelay="0.3">
-            <template #title>{{ item.description || '暂无简介' }}</template>
-            <div class="episode-item" @click="playVideo(item.index)">
-              <span class="font-14-400 c-000" v-if="video.type === 2">第{{ item.index }}集</span>
-              <span class="font-14-400 c-000" v-if="video.type === 1">播放</span>
-            </div>
-          </a-tooltip>
-        </template>
-      </div>
+      <a-tabs v-model:activeKey="activeKey" style="z-index: 9999; position: relative" :tabBarStyle="{ color: '#999' }">
+        <a-tab-pane :tab="season.name" v-for="(season, index) in seasons" :key="index">
+          <div class="episodes flex-row">
+            <template v-for="(item, index) in season.episodes">
+              <a-tooltip :mouseEnterDelay="0.3">
+                <template #title>{{ item.description || '暂无简介' }}</template>
+                <div class="episode-item" @click="playVideo(item.index)">
+                  <span class="font-14-400 c-000" v-if="video.type === 2">第{{ item.index }}集</span>
+                  <span class="font-14-400 c-000" v-if="video.type === 1">播放</span>
+                </div>
+              </a-tooltip>
+            </template>
+          </div>
+        </a-tab-pane>
+      </a-tabs>
     </div>
 
     <Setting
@@ -64,13 +69,25 @@ import eventBus, { EventMsg } from '../../utils/event_bus';
 import TipsConfirm from '../../utils/tips_confirm';
 import playHistory, { RecentEpisodRecord } from './history';
 import { downMediaByID, getMediaByID } from '../../api';
-
 const settingVisible = ref<boolean>(false);
-
+const seasonMapper: any = {
+  1: '一',
+  2: '二',
+  3: '三',
+  4: '四',
+  5: '五',
+  6: '六',
+  7: '七',
+  8: '八',
+  9: '九',
+  10: '十',
+};
 const route = useRoute();
 const router = useRouter();
 const value = ref(1);
 const bgPath = ref('');
+const activeKey = ref(0);
+const seasons = reactive<SeasonItem[]>([]);
 
 const video = reactive<VideoInfo>({
   id: 0,
@@ -103,6 +120,34 @@ function handleGetVideo() {
         }
       });
     }
+
+    video.episodes?.sort((a, b) => {
+      return a.season - b.season;
+    });
+
+    let temp: SeasonItem = {
+      name: '',
+      num: 0,
+      episodes: [],
+    };
+    temp.num = video.episodes![0].season;
+    temp.name = `第${seasonMapper[temp.num]}季`;
+    for (let index = 0; index < video.episodes!.length; index++) {
+      const item = video.episodes![index];
+      if (item.season === temp.num) {
+        temp.episodes.push(item);
+      } else {
+        seasons.push(JSON.parse(JSON.stringify(temp)));
+        temp.num = item.season;
+        temp.name = `第${seasonMapper[temp.num]}季`;
+        temp.episodes.splice(0);
+      }
+    }
+    seasons.push(temp);
+    if (seasons.length === 1) {
+      seasons[0].name = '全集';
+    }
+
     video.play_config = video.play_config ? JSON.parse(resp.data.play_config) : null;
 
     video.full_name = `${video.title}(${video.release_date})`;
@@ -177,6 +222,24 @@ onUnmounted(() => {
 </script>
 
 <style lang="less" scoped>
+:deep(.ant-tabs-tab:hover) {
+  color: #fff !important;
+}
+:deep(.ant-tabs-ink-bar) {
+  background-color: #f0f0f0 !important;
+}
+:deep(.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn) {
+  color: #fff;
+}
+
+:deep(
+    .ant-tabs-top > .ant-tabs-nav::before,
+    .ant-tabs-bottom > .ant-tabs-nav::before,
+    .ant-tabs-top > div > .ant-tabs-nav::before,
+    .ant-tabs-bottom > div > .ant-tabs-nav::before
+  ) {
+  border-bottom: 1px solid #999;
+}
 .btn {
   position: absolute;
   bottom: 60px;
