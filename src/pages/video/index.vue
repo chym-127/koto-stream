@@ -5,7 +5,7 @@
     </div>
     <div class="bg full" v-else :style="{ backgroundImage: 'url(' + defaultBg + ')' }"></div>
     <div class="mask full"></div>
-    <div class="flex-row info-box" style="padding: 30px 40px 30px 40px">
+    <div class="flex-row info-box" style="padding: 30px 40px 15px 40px">
       <div class="left flex-1">
         <div class="ellips-1">
           <span class="title">{{ video.title }}</span>
@@ -30,14 +30,14 @@
       </div>
     </div>
 
-    <div style="padding: 0 40px 20px 40px; overflow: auto; height: 150px">
+    <div style="padding: 0 30px 0 40px; overflow: hidden; height: 200px">
       <a-tabs v-model:activeKey="activeKey" style="z-index: 3; position: relative" :tabBarStyle="{ color: '#999' }">
         <a-tab-pane :tab="season.name" v-for="(season, index) in seasons" :key="index">
-          <div class="episodes flex-row">
+          <div class="episodes flex-row" style="overflow: auto; height: 150px">
             <template v-for="(item, index) in season.episodes">
               <a-tooltip :mouseEnterDelay="0.3">
                 <template #title>{{ item.description || '暂无简介' }}</template>
-                <div class="episode-item" @click="playVideo(item.index)">
+                <div class="episode-item" @click="playVideo(`${item.season}-${item.index}`)">
                   <span class="font-14-400 c-000" v-if="video.type === 2">第{{ item.index }}集</span>
                   <span class="font-14-400 c-000" v-if="video.type === 1">播放</span>
                 </div>
@@ -141,6 +141,7 @@ function handleGetVideo() {
         temp.num = item.season;
         temp.name = `第${seasonMapper[temp.num]}季`;
         temp.episodes.splice(0);
+        temp.episodes.push(item);
       }
     }
     seasons.push(temp);
@@ -155,7 +156,7 @@ function handleGetVideo() {
     if (video.type === 2) {
       lastRecent = playHistory.getRecentEpisod(video.full_name);
       if (lastRecent) {
-        historyTips.newTipConfirm(`检测到上次播放到第${lastRecent.index}集，是否继续播放`, -1);
+        historyTips.newTipConfirm(`检测到上次播放到第${lastRecent.key}集，是否继续播放`, -1);
       }
     }
   });
@@ -167,12 +168,22 @@ function updateSetting() {
   handleGetVideo();
 }
 
-function playVideo(index: number) {
+function playVideo(key: string) {
+  let arr = key.split('-') || [];
+  let i = 0;
+  let s = 0;
+  if (arr[0]) {
+    s = Number(arr[0]);
+  }
+  if (arr[1]) {
+    i = Number(arr[1]);
+  }
   store.set('CURRENT_VIDEO', video, true);
   router.push({
     path: '/video/player',
     query: {
-      index: index,
+      index: i,
+      season: s,
     },
   });
 }
@@ -207,7 +218,7 @@ let menus = [
 
 const historyTips = new TipsConfirm(document.getElementById('content') as Element, {
   okCallback: () => {
-    playVideo(lastRecent!.index - 1);
+    playVideo(lastRecent!.key);
   },
   cancelCallback: () => {},
 });

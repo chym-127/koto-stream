@@ -186,6 +186,11 @@ function getVideoInfoFromCom(MOVS) {
                     let arr = property.split(":")
                     let key = arr[arr.length - 1]
                     if (key === 'title') {
+                        if (seasonReg.test(content)) {
+                            obj['more_season'] = true
+                        } else {
+                            obj['more_season'] = false
+                        }
                         obj[key] = content.replaceAll(seasonReg, "")
                     }
                     if (key === 'release_date') {
@@ -197,7 +202,7 @@ function getVideoInfoFromCom(MOVS) {
         }
     }
     if (MOVS[obj.title]) {
-        obj = Object.assign(obj, MOVS[obj.title])
+        obj = Object.assign(obj,MOVS[obj.title])
     }
     if (!obj["episodes"] || !obj["episodes"].length) {
         obj["episodes"] = []

@@ -43,6 +43,12 @@ function getVideoInfoFromClub(MOVS) {
         }
 
         let titleDom = document.getElementsByClassName("product-title")[0]
+        let t = String(titleDom.firstChild.textContent)
+        if (seasonReg.test(t)) {
+            obj['more_season'] = true
+        } else {
+            obj['more_season'] = false
+        }
         obj.title = titleDom.firstChild.textContent.replaceAll(seasonReg, "")
         if (MOVS[obj.title]) {
             obj = Object.assign(obj, MOVS[obj.title])
@@ -64,6 +70,7 @@ function getVideoInfoFromClub(MOVS) {
         let result = Object.keys(window.episodes).map((key) => window.episodes[key]);
         obj["episodes"] = obj["episodes"].concat(result)
         MOVS[obj.title] = obj
+        console.log(obj);
     } catch (error) {
         console.log(error);
     }

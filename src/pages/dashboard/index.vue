@@ -79,7 +79,7 @@ if (lastVideo && lastVideo.id) {
     setMenu([
       {
         id: 'PLAY_LAST_VIDEO',
-        name: `继续播放：${video.title}`,
+        name: `继续播放：${video.title} ${lastVideo.e_season}-${lastVideo.e_index}`,
         clickFunc: playLastMedia,
       },
     ]);
@@ -96,6 +96,7 @@ function playLastMedia() {
     path: '/video/player',
     query: {
       index: lastVideo.e_index,
+      season: lastVideo.e_season,
     },
   });
 }

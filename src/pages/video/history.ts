@@ -7,7 +7,7 @@ interface History {
 }
 
 interface RecentEpisodRecord {
-    index: number,
+    key: string,
     progress: number,
     updateAt: number
 }
@@ -18,7 +18,7 @@ class PlayHistory {
     constructor() {
     }
 
-    set(key: string, episodeIndex: number, progress: number) {
+    set(key: string, episodeIndex: string, progress: number) {
         let data = store.get(key) || {}
         data[episodeIndex] = {
             progress: progress,
@@ -28,7 +28,7 @@ class PlayHistory {
     }
 
 
-    get(key: string, episodeIndex: number) {
+    get(key: string, episodeIndex: string) {
         let data = store.get(key) || {}
         return data[episodeIndex] || null
     }
@@ -39,7 +39,7 @@ class PlayHistory {
 
         if (data) {
             let newRecord: RecentEpisodRecord = {
-                index: 0,
+                key: "",
                 progress: 0,
                 updateAt: 0
             }
@@ -48,7 +48,7 @@ class PlayHistory {
                     const item = data[key];
                     if (newRecord.updateAt < item.updateAt) {
                         newRecord.updateAt = item.updateAt
-                        newRecord.index = Number(key)
+                        newRecord.key = key
                         newRecord.progress = item.progress
                     }
                 }

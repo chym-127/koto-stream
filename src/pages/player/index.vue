@@ -65,9 +65,10 @@ let currentEpisode: Episode | undefined;
 let videoPlayConfig: VideoPlayConfig | undefined;
 
 let currentIndex = ref<number>(Number(route.query.index));
+let currentSeason = ref<number>(Number(route.query.season || 1));
 if (currentVideo) {
   currentEpisode = currentVideo.episodes?.find((item, index) => {
-    return item.index === currentIndex.value;
+    return item.index === currentIndex.value && item.season === currentSeason.value;
   });
   videoPlayConfig = currentVideo.play_config;
 }
@@ -113,6 +114,7 @@ let timeId = setTimeout(() => {
     'LAST_VIDEO',
     {
       id: currentVideo.id,
+      e_season: currentSeason.value,
       e_index: currentEpisode?.index,
     },
     true
@@ -139,8 +141,6 @@ function timeupdate() {
         playNextVideo();
       }
     }
-    console.log(videoInstance.currentTime);
-    
     ads.forEach((range) => {
       if (range.startSec <= videoInstance.currentTime && videoInstance.currentTime <= range.endSec) {
         seekVideo(range.sec);
@@ -161,13 +161,6 @@ onMounted(() => {
     // hls = new Hls({
     //   loader: TauriLoader,
     // });
-    hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-      console.log('video and hls.js are now bound together !');
-    });
-    hls.on(Hls.Events.MANIFEST_PARSED, function (event: any, data: any) {
-      console.log(event, data);
-      console.log('manifest loaded, found ' + data.levels.length + ' quality level');
-    });
     // bind them together
     hls.attachMedia(videoInstance);
     playVideo(currentEpisode!, currentIndex.value);
@@ -193,8 +186,6 @@ const playVideo = (e: Episode, index: number) => {
   } else {
     extractAds(currentEpisode.url).then((resp: any) => {
       ads = resp as AdsRange[];
-      console.log(ads);
-      
     });
     hls!.loadSource(currentEpisode.url);
   }
@@ -325,12 +316,12 @@ const historyTips = new TipsConfirm(document.getElementById('content') as Elemen
 
 let progressState = 0;
 function addHistory(progress: number) {
-  playHistory.set(currentVideo.full_name!, currentEpisode!.index, progress);
+  playHistory.set(currentVideo.full_name!, `${currentEpisode!.season}-${currentEpisode!.index}`, progress);
   progressState = progress;
 }
 
 function checkHasHistory() {
-  let data = playHistory.get(currentVideo.full_name!, currentEpisode!.index);
+  let data = playHistory.get(currentVideo.full_name!, `${currentEpisode!.season}-${currentEpisode!.index}`);
   if (data && data.progress) {
     progress.value = data.progress;
     progressStr.value = new Date(data.progress * 1000).toISOString().slice(11, 19);
