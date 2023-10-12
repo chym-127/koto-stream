@@ -42,7 +42,6 @@
 </template>
 
 <script setup lang="ts">
-import { appWindow } from '@tauri-apps/api/window';
 import { onMounted, onUnmounted, reactive, ref } from 'vue';
 import { register, unregisterAll } from '@tauri-apps/api/globalShortcut';
 import { useRoute } from 'vue-router';
@@ -54,7 +53,6 @@ import appConfig from '../../utils/config';
 import windowHelper, { WindowSize } from '../../utils/window_helper';
 import TipsConfirm from '../../utils/tips_confirm';
 import { getMediaLocalResouce } from '../../utils';
-import { TauriLoader, fetchSupported } from './TauriLoader';
 import extractAds, { AdsRange } from '../../utils/ad_skip';
 
 const hasMask = ref(settingStore.get('play_mask') || false);
@@ -213,16 +211,9 @@ const playNextVideo = () => {
 };
 
 // 全局快捷键
-let isMinimize = ref(false);
 unregisterAll();
 register('CommandOrControl+D', async () => {
-  if (!isMinimize.value) {
-    await appWindow.minimize();
-    isMinimize.value = true;
-  } else {
-    await appWindow.unminimize();
-    isMinimize.value = false;
-  }
+  windowHelper.toggleMinimize();
 });
 
 register('CommandOrControl+E', () => {
@@ -270,7 +261,31 @@ const initWindow = async () => {
   }
   await windowHelper.alwaysOnTop(true);
 };
+function SSEMsgCallBack(msg: { name: string; data: any }) {
+  if (msg.name === 'IRREMOTE') {
+    switch (msg.data) {
+      //前进
+      case 'C43FF00':
+        seekVideo(10);
+        break;
+      //后退
+      case 'B44FF00':
+        seekVideo(-10);
+        break;
+      case 'F40FF00':
+        playOrPause()
+        break;
+      default:
+        break;
+    }
+  }
+}
 
+eventBus.on('SSE-MSG', SSEMsgCallBack);
+
+onUnmounted(() => {
+  eventBus.off('SSE-MSG', SSEMsgCallBack);
+});
 //恢复窗口状态
 const restoreWindow = async () => {
   if (windowHelper.currentWindowSize === WindowSize.MINI) {

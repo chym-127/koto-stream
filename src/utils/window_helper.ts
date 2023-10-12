@@ -1,4 +1,5 @@
-import { LogicalSize, appWindow } from '@tauri-apps/api/window';
+import { LogicalPosition, LogicalSize, appWindow } from '@tauri-apps/api/window';
+import { move_window, Position } from "tauri-plugin-positioner-api";
 import appConfig from './config';
 import { settingStore } from './store';
 
@@ -13,9 +14,35 @@ enum WindowSize {
 class WindowHelper {
     currentWindowSize: WindowSize;
     lock: boolean = false
+
     constructor() {
         this.currentWindowSize = settingStore.get("currentWindowSize") || WindowSize.NORMAL
     }
+
+
+    async toggleMinimize() {
+        if (this.lock) {
+            return
+        }
+        this.lock = true
+        try {
+            let flag = await appWindow.isMinimized()
+
+            if (flag) {
+                await appWindow.unminimize()
+            } else {
+                await appWindow.minimize()
+            }
+        } finally {
+            this.lock = false
+        }
+    }
+
+
+    async moveWindow(pos: Position) {
+        move_window(pos);
+    }
+
 
     // 设置为标准大小屏幕
     async normalScreen() {

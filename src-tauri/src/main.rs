@@ -12,6 +12,11 @@ fn main() {
             handle_exists_file,
             handle_create_dir
         ])
+        .plugin(tauri_plugin_positioner::init())
+        // This is required to get tray-relative positions to work
+        // .on_system_tray_event(|app, event| {
+        //    tauri_plugin_positioner::on_tray_event(app, &event);
+        // })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
